@@ -6,6 +6,7 @@
 + Square
 + Division
 + GCD
++ Square root
 ----
 
 ----

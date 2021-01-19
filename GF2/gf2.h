@@ -43,11 +43,13 @@ int gf2_mulmod(gf2* dst, gf2* a, gf2* b, gf2* mod);
 
 int gf2_long_division(gf2* Q, gf2* R, gf2* A, gf2* B);
 void gf2_square(gf2* dst, gf2* a);
+void gf2_squaremod(gf2* dst, gf2* a, gf2* mod);
 
 void gf2_left_to_right(gf2* dst, gf2* a, int e);
 void gf2_pow(gf2* dst, gf2* a, int e);
 void gf2_powmod(gf2* dst, gf2* a, int e, gf2* mod);
 
-int fq_gcd(gf2* gcd, gf2* a, gf2* b);
+int gf2_gcd(gf2* gcd, gf2* a, gf2* b);
+void gf2_square_root(gf2* dst, gf2* a, gf2* mod);
 
 #endif

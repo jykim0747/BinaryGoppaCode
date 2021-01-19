@@ -187,17 +187,42 @@ void test_gf2_gcd()
     gf2 A, B, gcd;
     int m = 13;
 
-    gf2_init(&A, m + 1);
-    gf2_random_gen_fix(&A);
+    gf2_init(&A, m);
+    gf2_random_gen(&A);
 
     gf2_init(&B, m);
-    gf2_random_gen_fix(&B);
+    gf2_random_gen(&B);
 
     gf2_gcd(&gcd, &A, &B);
 
     printf("A = ");                 gf2_print(&A);
     printf("B = ");                 gf2_print(&B);
     printf("gcd = ");               gf2_print(&gcd);
+
+}
+
+void test_gf2_square_root()
+{
+    gf2 A, B, mod;
+    int m = 13;
+
+/* z^13 + z^12 + z^10 + z^9 + z^7 + z^4 + 1, irreducible */
+    gf2_init(&mod, m);
+    gf2_set_index(&mod, 13);
+    gf2_set_index(&mod, 12);
+    gf2_set_index(&mod, 10);
+    gf2_set_index(&mod, 9);
+    gf2_set_index(&mod, 7);
+    gf2_set_index(&mod, 4);
+    gf2_set_index(&mod, 0);
+
+    gf2_init(&A, m-1);
+    gf2_random_gen(&A);
+    gf2_square_root(&B, &A, &mod);
+
+    printf("mod = ");               gf2_print(&mod);
+    printf("A = ");                 gf2_print(&A);
+    printf("square root of A = ");  gf2_print(&B);
 
 }
 
@@ -224,11 +249,12 @@ void test_gf2_math_operation()
     
     printf("Start powmod test \n");
     test_gf2_powmod();
-    */
+    
     printf("Start gcd test \n");
     test_gf2_gcd();
-    
-    
+    */
+    printf("Start square root test \n");
+    test_gf2_square_root();
 }
 
 

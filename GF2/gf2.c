@@ -434,6 +434,20 @@ void gf2_square(gf2* dst, gf2* a)
 }
 /////////////////////////////////////////////////////////////////////
 /*
+@   dst : dst = a^2 mod (mod)
+*/
+void gf2_squaremod(gf2* dst, gf2* a, gf2* mod)
+{
+    int i;
+    gf2 tmp, Q;
+
+    gf2_init(&Q, 1);
+    gf2_square(&tmp, a);
+    gf2_long_division(&Q, dst, &tmp, mod);
+    
+}
+/////////////////////////////////////////////////////////////////////
+/*
 @   method of powering
 */
 void gf2_left_to_right(gf2* dst, gf2* a, int e)
@@ -514,7 +528,7 @@ void gf2_powmod(gf2* dst, gf2* a, int e, gf2* mod)
 @   gcd = gcd(A,B)    
 @   if A = 0, then gcd(A, B) == B 
 */  
-int fq_gcd(gf2* gcd, gf2* a, gf2* b)
+int gf2_gcd(gf2* gcd, gf2* a, gf2* b)
 {  
     gf2 R, Q;
     gf2 t0, t1, t2;
@@ -529,7 +543,7 @@ int fq_gcd(gf2* gcd, gf2* a, gf2* b)
     gf2_copy(&t0, a);
     gf2_copy(&t1, b);
                                                           
-    while(t1.binary != 0)
+    while(t1.binary[0] != 0)
     {                                                     
         gf2_copy(&t2, &t0);
         gf2_copy(&t0, &t1);
@@ -540,3 +554,28 @@ int fq_gcd(gf2* gcd, gf2* a, gf2* b)
                                           
     return res;                                           
 }                                                         
+/////////////////////////////////////////////////////////////////////
+/*
+@   dst : dst = a^{2^{m-1}} mod (mod)
+*/
+void gf2_square_root(gf2* dst, gf2* a, gf2* mod)
+{
+    int index;
+    int i = 0;
+    gf2 tmp, tmp2;
+
+    /* index : 2^{m-1}의 m-1을 의미한다. */
+    index = mod->deg - 2;
+
+    gf2_init(&tmp, 1);
+    gf2_init(&tmp2, 1);
+
+    gf2_copy(&tmp, a);
+    while(i < index)
+    {
+        gf2_squaremod(&tmp2, &tmp, mod);
+        gf2_copy(&tmp, &tmp2);
+        i++;
+    }
+    gf2_copy(dst, &tmp);
+}
