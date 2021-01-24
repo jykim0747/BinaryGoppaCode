@@ -524,6 +524,33 @@ void gf2_powmod(gf2* dst, gf2* a, int e, gf2* mod)
 
 }
 /////////////////////////////////////////////////////////////////////
+/*
+@   dst : dst = a^{2^e} mod (mod)
+*/
+void gf2_repeated_squaremod(gf2* dst, gf2* a, int e, gf2* mod)
+{
+    int i = 0;
+    gf2 tmp, tmp2;
+ 
+    if(e == 0)
+    {
+        gf2_copy(dst, a);
+        return;
+    }
+
+    gf2_init(&tmp, 1);
+    gf2_init(&tmp2, 1);
+
+    gf2_copy(&tmp, a);
+    while(i < e)
+    {
+        gf2_squaremod(&tmp2, &tmp, mod);
+        gf2_copy(&tmp, &tmp2);
+        i++;
+    }
+    gf2_copy(dst, &tmp);
+}
+/////////////////////////////////////////////////////////////////////
 /*                                                        
 @   gcd = gcd(A,B)    
 @   if A = 0, then gcd(A, B) == B 
@@ -560,22 +587,96 @@ int gf2_gcd(gf2* gcd, gf2* a, gf2* b)
 */
 void gf2_square_root(gf2* dst, gf2* a, gf2* mod)
 {
-    int index;
-    int i = 0;
-    gf2 tmp, tmp2;
-
-    /* index : 2^{m-1}의 m-1을 의미한다. */
+    int index;      /* index : 2^{m-1}의 m-1을 의미한다. */
     index = mod->deg - 2;
 
-    gf2_init(&tmp, 1);
-    gf2_init(&tmp2, 1);
+    gf2_repeated_squaremod(dst, a, index, mod);
 
-    gf2_copy(&tmp, a);
-    while(i < index)
+}
+/////////////////////////////////////////////////////////////////////
+/*
+@   return IRREDUCIBLE or REDUCIBLE
+*/
+int gf2_is_irreducible(gf2* src)
+{
+    int i;
+    gf2 f, gcd, Q, R;
+    gf2 x, xpow, tmp;
+    int count = 0;
+
+    if(src->deg == 0)
     {
-        gf2_squaremod(&tmp2, &tmp, mod);
-        gf2_copy(&tmp, &tmp2);
-        i++;
+        return REDUCIBLE;
     }
-    gf2_copy(dst, &tmp);
+
+    gf2_init(&f, 1);
+    gf2_init(&Q, src->deg);
+    gf2_init(&R, src->deg);
+    gf2_init(&gcd, 1);
+    gf2_init(&x, 1);
+    gf2_init(&xpow, 1);
+    gf2_init(&tmp, 1);
+
+    gf2_copy(&f, src);
+    gf2_set_index(&x, 1);   /* x = X */
+    
+    for(i=1; i<f.deg; i++)
+    {
+        /* h = gcd(f, x^{2^i} -x mod(f)) */
+        gf2_repeated_squaremod(&xpow, &x, i, &f);
+        gf2_addmod(&tmp, &xpow, &x, &f);    /* x mod (f) */
+        gf2_set_zero(&xpow);
+        if( gf2_is_zero(&tmp) == ZERO)
+        {
+            count ++;
+            break;
+        }
+        gf2_gcd(&gcd, &f, &tmp);
+        if( gf2_is_one(&gcd) == NOT_ONE)
+        {
+            gf2_long_division(&Q, &R, &f, &gcd);
+            gf2_copy(&f, &Q);
+            count ++;
+            if(count >= 2)
+            {
+                break;
+            }
+        }
+    }
+    
+    /* 자기 자신일 경우와 f/f로 1인경우 고려. */
+    if( (gf2_is_one(&f) == NOT_ONE) && (f.deg != src->deg))
+    {
+        count ++;
+    }
+
+    if(count == 1)
+    {
+        printf("Irreducible\n");
+        return IRREDUCIBLE;
+    }
+    else
+    {
+        printf("Reducible\n");
+        return REDUCIBLE;
+    }
+
+}
+/////////////////////////////////////////////////////////////////////
+/*
+@   generate irreducible polynomial GF2
+*/
+void gf2_generate_irreducible(gf2* src, int degree)
+{
+    gf2 tmp;
+    int res = 1;
+
+    gf2_init(&tmp, degree);
+    
+    while(res != IRREDUCIBLE)
+    {
+        gf2_random_gen_fix(&tmp);
+        res = gf2_is_irreducible(&tmp);
+    }
+    gf2_copy(src, &tmp);
 }

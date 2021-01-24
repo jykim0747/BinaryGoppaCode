@@ -226,6 +226,45 @@ void test_gf2_square_root()
 
 }
 
+void test_gf2_is_irreducible_root()
+{
+    gf2 A, B;
+    int res = 0;
+    int m = 13;
+
+    /* z^13 + z^12 + z^10 + z^9 + z^7 + z^4 + 1, irreducible */
+    gf2_init(&A, m);
+    gf2_set_index(&A, 13);
+    gf2_set_index(&A, 12);
+    gf2_set_index(&A, 10);
+    gf2_set_index(&A, 9);
+    gf2_set_index(&A, 7);
+    gf2_set_index(&A, 4);
+    gf2_set_index(&A, 0);
+
+    gf2_print(&A);
+    printf("A is irreducible ? = ");
+    res = gf2_is_irreducible(&A);
+
+    gf2_init(&B, 2);    /* x^2 + 1, reducible */
+    gf2_set_index(&B, 0);
+    gf2_set_index(&B, 2);
+    gf2_print(&B);
+    printf("B is irreducible ? = ");    gf2_is_irreducible(&B);
+}
+
+void test_gf2_generate_irreducible()
+{
+    gf2 A;
+    int res = 0;
+    int m = 5;
+
+    gf2_init(&A, m);
+    gf2_generate_irreducible(&A, m);
+    printf("irreducible polynomial = ");      gf2_print(&A);
+
+}
+
 void test_gf2_math_operation()
 {
     /*
@@ -252,9 +291,16 @@ void test_gf2_math_operation()
     
     printf("Start gcd test \n");
     test_gf2_gcd();
-    */
+    
     printf("Start square root test \n");
     test_gf2_square_root();
+    
+    printf("Start is_irreducible test \n");
+    test_gf2_is_irreducible_root();
+
+    printf("Start generate_irreducible test \n");
+    test_gf2_generate_irreducible();
+    */
 }
 
 

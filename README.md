@@ -29,6 +29,12 @@ https://sagecell.sagemath.org/
     C = z^12+z^10+z^9+z^8+z^5+z^1+z^0
     S(A*B) == S(C)
 
+irreducible test over GF(2)
+
+    bin.<z> = GF(2)[]
+    A = z^13+z^11+z^9+z^8+z^7+z^6+z^5+z^4+z^3+z^2+z^0
+    A.is_irreducible()
+
 
 ----
 ### 
