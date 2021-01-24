@@ -570,7 +570,7 @@ int gf2_gcd(gf2* gcd, gf2* a, gf2* b)
     gf2_copy(&t0, a);
     gf2_copy(&t1, b);
                                                           
-    while(t1.binary[0] != 0)
+    while(gf2_is_zero(&t1) != ZERO)
     {                                                     
         gf2_copy(&t2, &t0);
         gf2_copy(&t0, &t1);
@@ -632,10 +632,14 @@ int gf2_is_irreducible(gf2* src)
             break;
         }
         gf2_gcd(&gcd, &f, &tmp);
+        //printf("f ");    gf2_print(&f);
+        //printf("tmp ");  gf2_print(&tmp);
+        //printf("i : %d ", i);  gf2_print(&gcd);
         if( gf2_is_one(&gcd) == NOT_ONE)
         {
             gf2_long_division(&Q, &R, &f, &gcd);
             gf2_copy(&f, &Q);
+            //printf("f !! ");    gf2_print(&f);
             count ++;
             if(count >= 2)
             {

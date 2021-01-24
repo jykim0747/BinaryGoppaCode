@@ -257,7 +257,7 @@ void test_gf2_generate_irreducible()
 {
     gf2 A;
     int res = 0;
-    int m = 5;
+    int m = 128;
 
     gf2_init(&A, m);
     gf2_generate_irreducible(&A, m);
@@ -297,10 +297,10 @@ void test_gf2_math_operation()
     
     printf("Start is_irreducible test \n");
     test_gf2_is_irreducible_root();
-
+    */
     printf("Start generate_irreducible test \n");
     test_gf2_generate_irreducible();
-    */
+    
 }
 
 
