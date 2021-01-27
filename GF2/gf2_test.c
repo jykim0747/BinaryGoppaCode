@@ -3,17 +3,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-void test_gf2_init();
-void test_gf2_add();
-void test_gf2_mul();
-
-void test_gf2_math_operation();
-void test_gf2_div();
-void test_gf2_square();
-void test_gf2_pow();
-void test_gf2_mulmod();
-
-
 void test_gf2_init()
 {
     gf2 A, B;
@@ -32,7 +21,7 @@ void test_gf2_init()
 
 }
 
-void test_gf2_add()
+static void test_gf2_add()
 {
     gf2 A, B, C;
     int t = 20;
@@ -52,7 +41,7 @@ void test_gf2_add()
 
 }
 
-void test_gf2_mul()
+static void test_gf2_mul()
 {
     gf2 A, B, C;
     int t = 20;
@@ -75,7 +64,7 @@ void test_gf2_mul()
 
 }
 
-void test_gf2_div()
+static void test_gf2_div()
 {
     gf2 A, B, Q, R;
     int m = 13;
@@ -99,7 +88,7 @@ void test_gf2_div()
 
 }
 
-void test_gf2_square()
+static void test_gf2_square()
 {
     gf2 A, B;
     int t = 20;
@@ -115,7 +104,7 @@ void test_gf2_square()
 
 }
 
-void test_gf2_pow()
+static void test_gf2_pow()
 {
     gf2 A, B;
     int t = 13;
@@ -132,7 +121,7 @@ void test_gf2_pow()
 
 }
 
-void test_gf2_mulmod()
+static void test_gf2_mulmod()
 {
     gf2 A, B, C, mod;
     int m = 13;
@@ -159,7 +148,7 @@ void test_gf2_mulmod()
 }
 
 
-void test_gf2_powmod()
+static void test_gf2_powmod()
 {
     gf2 A, C, mod;
     int e = 10;
@@ -182,7 +171,7 @@ void test_gf2_powmod()
 
 }
 
-void test_gf2_gcd()
+static void test_gf2_gcd()
 {
     gf2 A, B, gcd;
     int m = 13;
@@ -201,7 +190,7 @@ void test_gf2_gcd()
 
 }
 
-void test_gf2_square_root()
+static void test_gf2_square_root()
 {
     gf2 A, B, mod;
     int m = 13;
@@ -226,7 +215,7 @@ void test_gf2_square_root()
 
 }
 
-void test_gf2_is_irreducible_root()
+static void test_gf2_is_irreducible_root()
 {
     gf2 A, B;
     int res = 0;
@@ -253,10 +242,9 @@ void test_gf2_is_irreducible_root()
     printf("B is irreducible ? = ");    gf2_is_irreducible(&B);
 }
 
-void test_gf2_generate_irreducible()
+static void test_gf2_generate_irreducible()
 {
     gf2 A;
-    int res = 0;
     int m = 128;
 
     gf2_init(&A, m);
@@ -267,7 +255,7 @@ void test_gf2_generate_irreducible()
 
 void test_gf2_math_operation()
 {
-    /*
+    
     printf("Start add test \n");
     test_gf2_add();
 
@@ -297,18 +285,8 @@ void test_gf2_math_operation()
     
     printf("Start is_irreducible test \n");
     test_gf2_is_irreducible_root();
-    */
+    
     printf("Start generate_irreducible test \n");
     test_gf2_generate_irreducible();
     
-}
-
-
-int main(){
-
-    srand((unsigned int)time(NULL));
-    //test_gf2_init();
-    test_gf2_math_operation();
-  
-    return 1;
 }

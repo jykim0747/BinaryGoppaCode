@@ -37,5 +37,3 @@ irreducible test over GF(2)
 
 
 ----
-### 
-나중에 openssl bn 사용 예정

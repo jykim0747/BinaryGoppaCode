@@ -1,6 +1,9 @@
 #ifndef _GF2_H_
 #define _GF2_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #define size 100
 
 /* GF2 element struct */
@@ -59,6 +62,9 @@ void gf2_square_root(gf2* dst, gf2* a, gf2* mod);
 
 int gf2_is_irreducible(gf2* src);
 void gf2_generate_irreducible(gf2* src, int degree);
+
+void test_gf2_init();
+void test_gf2_math_operation();
 
 
 #endif
