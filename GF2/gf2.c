@@ -234,8 +234,6 @@ void gf2_mul_shift(gf2* dst, gf2* a, int index)
     unsigned char tmp;
 
     int aq = a->deg / 8;
-    int dq = dst->deg / 8;
-
     int idxq;
     int idxr; 
 
@@ -377,7 +375,6 @@ int gf2_long_division(gf2* Q, gf2* R, gf2* A, gf2* B)
     
     gf2 R_tmp;
     gf2 B_tmp;
-    int i, j, k;
     int len = A->deg - B->deg;
 
     gf2_init(&R_tmp, 1);
@@ -438,7 +435,6 @@ void gf2_square(gf2* dst, gf2* a)
 */
 void gf2_squaremod(gf2* dst, gf2* a, gf2* mod)
 {
-    int i;
     gf2 tmp, Q;
 
     gf2_init(&Q, 1);
@@ -632,14 +628,10 @@ int gf2_is_irreducible(gf2* src)
             break;
         }
         gf2_gcd(&gcd, &f, &tmp);
-        //printf("f ");    gf2_print(&f);
-        //printf("tmp ");  gf2_print(&tmp);
-        //printf("i : %d ", i);  gf2_print(&gcd);
         if( gf2_is_one(&gcd) == NOT_ONE)
         {
             gf2_long_division(&Q, &R, &f, &gcd);
             gf2_copy(&f, &Q);
-            //printf("f !! ");    gf2_print(&f);
             count ++;
             if(count >= 2)
             {
