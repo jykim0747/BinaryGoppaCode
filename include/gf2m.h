@@ -19,6 +19,19 @@ void gf2m_print(gf2m* src);
 void gf2m_fit_len(gf2m* src);
 void gf2m_random_gen(gf2m* src, int m);
 
+void gf2m_set_zero(gf2m* src);
+void gf2m_set_one(gf2m* src);
+void gf2m_copy(gf2m* dst, gf2m* src);
+void gf2m_set_index(gf2m* dst, gf2* src, int inedx);
+
+int gf2m_is_one(gf2m* src);
+int gf2m_is_zero(gf2m* src);
+
+void gf2m_add(gf2m* dst, gf2m* src1, gf2m* src2);
+void gf2m_mul_shcool(gf2m* dst, gf2m* a, gf2m* b, gf2* mod);
+void gf2m_mul(gf2m* dst, gf2m* a, gf2m* b, gf2* mod);
+
+
 void test_gf2m_math_operation();
 
 #endif
