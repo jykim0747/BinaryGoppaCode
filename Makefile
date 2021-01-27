@@ -3,11 +3,11 @@ CFLAGS= -Wall -g
 
 INCLUDE=${PWD}/include
 INCLUDE_GF2=${PWD}/GF2
+#SUBDIR=${PWD}/test ${PWD}/GF2 ${PWD}/GF2_extension
 INCLUDE_GF2m=${PWD}/GF2_extension
 OBJECTS= test.o gf2.o gf2_test.o gf2m.o gf2m_test.o
 SRCS = $(OBJECTS:.o=.c)
 TARGET=main.out
-
 
 $(TARGET): $(OBJECTS)
 	${CC} ${CFLAGS} -o $@ ${OBJECTS} -I${INCLUDE}
