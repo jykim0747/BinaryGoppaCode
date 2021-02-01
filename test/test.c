@@ -11,7 +11,7 @@ int main(){
     //test_gf2_init();
     //test_gf2_math_operation();
   
-    test_gf2m_math_operation();
+    //test_gf2m_math_operation();
 
     return 1;
 }

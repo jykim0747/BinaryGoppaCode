@@ -31,6 +31,7 @@ void gf2m_add(gf2m* dst, gf2m* src1, gf2m* src2);
 void gf2m_mul_shcool(gf2m* dst, gf2m* a, gf2m* b, gf2* mod);
 void gf2m_mul(gf2m* dst, gf2m* a, gf2m* b, gf2* mod);
 
+gf2 gf2m_monic(gf2m* dst, gf2m* a, gf2* mod);
 
 void test_gf2m_math_operation();
 
