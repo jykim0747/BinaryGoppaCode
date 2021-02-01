@@ -676,3 +676,72 @@ void gf2_generate_irreducible(gf2* src, int degree)
     }
     gf2_copy(src, &tmp);
 }
+/////////////////////////////////////////////////////////////////////
+/*
+@   gcd : gcd = ax+by, a, b의 최대공약수 (출력값)
+@     x : a의 역원 (출력값)
+@     y : b의 역원 (출력값)
+@     a : 입력 대상1 (입력값)
+@     b : 입력 대상2 (입력값)
+*/
+void gf2_xgcd(gf2* gcd, gf2* x, gf2* y, gf2* a, gf2* b)
+{
+    gf2 t0, t1, t2;
+    gf2 v0, v1, v2;
+    gf2 u0, u1, u2;
+    gf2 R , Q;
+    gf2 tmp;
+
+    int len = a->deg <= b->deg ? 2*b->deg : 2*a->deg;
+
+    gf2_init(&t0, 1);    gf2_init(&t1, 1);    gf2_init(&t2, 1);
+    gf2_init(&v0, 1);    gf2_init(&v1, 1);    gf2_init(&v2, 1);
+    gf2_init(&u0, 1);    gf2_init(&u1, 1);    gf2_init(&u2, 1);
+    gf2_init(&tmp, len);
+
+    gf2_init(&R, 1);
+    gf2_init(&Q, 1);
+
+    gf2_copy(&t0, a);
+    gf2_copy(&t1, b);
+
+    gf2_set_one(&v1);
+    gf2_set_zero(&v0);
+
+    gf2_set_one(&u0);
+    gf2_set_zero(&u1);
+
+    while(gf2_is_zero(&t1) != ZERO)
+    {
+        gf2_copy(&t2, &t0);
+        gf2_copy(&t0, &t1);
+
+        gf2_set_zero(&Q);
+        gf2_long_division(&Q, &R, &t2, &t1);
+        gf2_copy(&t1, &R);
+        gf2_add(&tmp, &t2, &t1);
+        gf2_copy(&t2, &tmp);
+        gf2_set_zero(&Q);
+        gf2_long_division(&Q, &R, &t2, &t0);
+        
+        gf2_copy(&u2, &u0);
+        gf2_copy(&v2, &v0);
+        gf2_copy(&u0, &u1);
+        gf2_copy(&v0, &v1);
+
+        gf2_mul(&tmp, &Q, &u1);
+        gf2_add(&u1, &u2, &tmp);
+        gf2_mul(&tmp, &Q, &v1);       //v1 = v2 - qv1
+
+        gf2_add(&v1, &v2 ,&tmp);
+        gf2_set_zero(&Q);
+    }
+    gf2_fit_len(&u0);
+    gf2_fit_len(&v0);
+    gf2_fit_len(&t0);
+
+    gf2_copy(x, &u0);
+    gf2_copy(y, &v0);
+    gf2_copy(gcd, &t0);
+
+}

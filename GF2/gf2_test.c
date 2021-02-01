@@ -253,6 +253,39 @@ static void test_gf2_generate_irreducible()
 
 }
 
+static void test_gf2_xgcd()
+{
+    gf2 A, mod;
+    gf2 X, Y;
+    gf2 gcd;
+    int m = 13;
+
+    gf2_init(&mod, m);
+    gf2_set_index(&mod, 13);
+    gf2_set_index(&mod, 4);
+    gf2_set_index(&mod, 3);
+    gf2_set_index(&mod, 1);
+    gf2_set_index(&mod, 0);
+    gf2_fit_len(&mod);
+
+    gf2_init(&A, m);
+    gf2_init(&X, m);
+    gf2_init(&Y, m);
+    
+    printf("mod = ");               gf2_print(&mod);
+
+    gf2_random_gen(&A);
+    printf("A = ");                 gf2_print(&A);
+
+    gf2_xgcd(&gcd, &X, &Y, &A, &mod );
+    printf("A*X + B*Y = gcd(A,B)\n");
+
+    printf("gcd = ");               gf2_print(&gcd);
+    printf("X(A의 역원)");            gf2_print(&X);
+    printf("Y(B의 역원)");            gf2_print(&Y);
+
+}
+
 void test_gf2_math_operation()
 {
     
@@ -288,5 +321,7 @@ void test_gf2_math_operation()
     
     printf("Start generate_irreducible test \n");
     test_gf2_generate_irreducible();
-    
+
+    printf("Start xgcd test \n");
+    test_gf2_xgcd();
 }
