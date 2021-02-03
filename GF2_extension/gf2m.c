@@ -237,12 +237,17 @@ gf2 gf2m_monic(gf2m* dst, gf2m* a, gf2* mod)
     gf2_copy(&a_tmp, &(a->term[a->deg]));
     gf2_fit_len(&a_tmp);
 
+    printf("최고차항 = ");  gf2_print(&a_tmp);
+    printf("mod = ");  gf2_print(mod);
+
     gf2_xgcd(&gcd, &inv, &tmp, &a_tmp, mod);
+    printf("역원 = ");  gf2_print(&inv);
 
     for(i=a->deg; i>=0; i--)
     {
         gf2_mulmod(&(dst->term[i]), &inv, &(a->term[i]), mod);
     }
+    gf2m_fit_len(dst);
 
     return inv;
 }

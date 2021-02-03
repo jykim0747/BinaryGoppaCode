@@ -66,27 +66,34 @@ void test_gf2m_monic()
     int m = 13;
     int t = 5;
     
+    /* z^13 + z^12 + z^10 + z^9 + z^7 + z^4 + 1, irreducible */
     gf2_init(&mod, m);
-    gf2_random_gen_fix(&mod);
+    gf2_set_index(&mod, 13);
+    gf2_set_index(&mod, 12);
+    gf2_set_index(&mod, 10);
+    gf2_set_index(&mod, 9);
+    gf2_set_index(&mod, 7);
+    gf2_set_index(&mod, 4);
+    gf2_set_index(&mod, 0);
 
     gf2m_init(&A, t);
     gf2m_init(&B, 1);
 
-    gf2m_random_gen(&A, m);
+    gf2m_random_gen(&A, m-1);
 
     printf("mod = ");       gf2_print(&mod);
     printf("A =");          gf2m_print(&A);
 
     xgcd = gf2m_monic(&B, &A, &mod);
-    printf("monic of A =");          gf2m_print(&B);
+    printf("monic of A = ");          gf2m_print(&B);
     printf("xcgd = ");      gf2_print(&xgcd);
 
 }
 
 void test_gf2m_math_operation(){
-    test_gf2m_init();
-    test_gf2m_add();
-    test_gf2m_mul();
-    //test_gf2m_monic();
+    //test_gf2m_init();
+    //test_gf2m_add();
+    //test_gf2m_mul();
+    test_gf2m_monic();
     
 }
