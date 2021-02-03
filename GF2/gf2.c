@@ -171,7 +171,7 @@ void gf2_copy(gf2* dst, gf2* a)
     
     dst->deg = a->deg;
 
-    for(i=(a->deg/8); i>=0; i--)
+    for(i=(a->deg); i>=0; i--)
     {
         dst->binary[i] = a->binary[i];
     }
@@ -692,7 +692,7 @@ void gf2_xgcd(gf2* gcd, gf2* x, gf2* y, gf2* a, gf2* b)
     gf2 R , Q;
     gf2 tmp;
 
-    int len = a->deg <= b->deg ? 2*b->deg : 2*a->deg;
+    int len = a->deg <= b->deg ? 2*(b->deg-1) : 2*(a->deg-1);
 
     gf2_init(&t0, 1);    gf2_init(&t1, 1);    gf2_init(&t2, 1);
     gf2_init(&v0, 1);    gf2_init(&v1, 1);    gf2_init(&v2, 1);
@@ -723,18 +723,25 @@ void gf2_xgcd(gf2* gcd, gf2* x, gf2* y, gf2* a, gf2* b)
         gf2_copy(&t2, &tmp);
         gf2_set_zero(&Q);
         gf2_long_division(&Q, &R, &t2, &t0);
-        
+         
         gf2_copy(&u2, &u0);
         gf2_copy(&v2, &v0);
         gf2_copy(&u0, &u1);
         gf2_copy(&v0, &v1);
 
         gf2_mul(&tmp, &Q, &u1);
+
         gf2_add(&u1, &u2, &tmp);
         gf2_mul(&tmp, &Q, &v1);       //v1 = v2 - qv1
-
         gf2_add(&v1, &v2 ,&tmp);
         gf2_set_zero(&Q);
+
+        //t1u0v0t0
+        printf("t1");   gf2_print(&t1);
+        printf("u0");   gf2_print(&u0);
+        printf("v0");   gf2_print(&v0);
+        printf("t0");   gf2_print(&t0);
+        printf("\n");
     }
     gf2_fit_len(&u0);
     gf2_fit_len(&v0);

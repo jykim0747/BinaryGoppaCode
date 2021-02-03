@@ -40,13 +40,22 @@ multiplication test over extension binary field
 
     bin.<z> = GF(2)[]
     mod = z^3+z^1+z^0
-    Fqm.<z> = GF(2^3, mod)
+    Fqm.<z> = GF(2^13, modulus = mod)
     PR_Fqm.<X> = PolynomialRing(Fqm)
     A = (z^0)*X^5+(z^2+z^1+z^0)*X^4+(z^1)*X^3+(z^1)*X^2+(z^3+z^2+z^0)*X^1+(z^3+z^2+z^0)*X^0
     B = (z^0)*X^5+(z^3+z^0)*X^4+(z^3+z^1)*X^3+(z^3+z^2+z^1+z^0)*X^2+(z^3+z^2+z^1+z^0)*X^1+(z^3)*X^0
     C = (z^0)*X^10+(z^2+z^0)*X^9+(z^2+z^1)*X^8+(z^2+z^0)*X^7+(z^2+z^0)*X^6+(z^1)*X^5+(z^1+z^0)*X^4+(z^2+z^1)*X^3+(z^2+z^1)*X^2+(z^2)*X^1+(z^0)*X^0
     A*B == C
 
+monic polynomial over extension binary field
+
+    bin.<z> = GF(2)[]
+    mod = z^13+z^12+z^10+z^9+z^7+z^4+z^0
+    Fqm.<z> = GF(2^13, modulus = mod)
+    PR_Fqm.<X> = PolynomialRing(Fqm)
+    A = (z^12+z^6+z^5+z^4+z^3+z^1+z^0)*X^5+(z^11+z^10+z^9+z^8+z^7+z^6+z^4+z^2)*X^4+(z^12+z^11+z^10+z^9+z^8+z^5+z^3+z^2+z^1+z^0)*X^3+(z^12+z^11+z^9+z^6+z^5+z^4+z^0)*X^2+(z^12+z^11+z^10+z^8+z^7+z^2+z^1+z^0)*X^1+(z^12+z^11+z^9+z^8+z^1)*X^0
+    B = (z^0)*X^5+(z^12+z^10+z^9+z^6+z^5+z^4+z^1+z^0)*X^4+(z^12+z^11+z^10+z^9+z^8+z^7+z^6+z^4+z^2+z^0)*X^3+(z^11+z^10+z^7+z^3+z^1+z^0)*X^2+(z^12+z^11+z^9+z^6+z^5+z^4+z^3+z^2+z^1+z^0)*X^1+(z^12+z^10+z^9+z^7+z^6+z^4+z^3+z^2+z^1)*X^0
+    A.monic() == B
 
 
 ----
