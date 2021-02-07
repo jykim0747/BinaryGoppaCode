@@ -32,6 +32,11 @@ void gf2m_mul_shcool(gf2m* dst, gf2m* a, gf2m* b, gf2* mod);
 void gf2m_mul(gf2m* dst, gf2m* a, gf2m* b, gf2* mod);
 
 gf2 gf2m_monic(gf2m* dst, gf2m* a, gf2* mod);
+void gf2m_mul_gf2_element(gf2m* dst, gf2m* src, gf2* element, gf2* mod);
+void gf2m_shift(gf2m* dst, gf2m* src, int shift);
+int gf2m_long_division(gf2m* Q, gf2m* R, gf2m* A, gf2m* B, gf2* mod);
+void gf2m_gcd(gf2m* gcd, gf2m* a, gf2m* b, gf2* mod);
+void gf2m_xgcd(gf2m* gcd, gf2m* a, gf2m* b, gf2m* a_inv, gf2m* b_inv, gf2m* mod);
 
 void test_gf2m_math_operation();
 

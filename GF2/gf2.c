@@ -735,13 +735,6 @@ void gf2_xgcd(gf2* gcd, gf2* x, gf2* y, gf2* a, gf2* b)
         gf2_mul(&tmp, &Q, &v1);       //v1 = v2 - qv1
         gf2_add(&v1, &v2 ,&tmp);
         gf2_set_zero(&Q);
-
-        //t1u0v0t0
-        printf("t1");   gf2_print(&t1);
-        printf("u0");   gf2_print(&u0);
-        printf("v0");   gf2_print(&v0);
-        printf("t0");   gf2_print(&t0);
-        printf("\n");
     }
     gf2_fit_len(&u0);
     gf2_fit_len(&v0);
