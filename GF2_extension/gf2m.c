@@ -18,16 +18,16 @@ static void gf2_print_noline(gf2* a)
 
     tmp = a->binary[q];
     for(j=qr; j>=0; j--){
-        if((tmp>>j)&0x01)
-            printf("z^%d+", 8*q+j);
+        if((tmp>>j) & 0x01)
+            printf("z^%d +", 8*q+j);
     }
 
     for(i=q-1; i>=0; i--)
     {   
         tmp = a->binary[i];
         for(j=7; j>=0; j--){   
-            if((tmp>>j)&0x01){
-                printf("z^%d+", i*8+j);
+            if((tmp>>j) & 0x01){
+                printf("z^%d +", i*8+j);
             }
         }
     }
@@ -213,6 +213,19 @@ void gf2m_mul(gf2m* dst, gf2m* a, gf2m* b, gf2* mod)
     }
     gf2m_mul_shcool(dst, a, b, mod);
     gf2m_fit_len(dst);
+
+}
+/////////////////////////////////////////////////////////////////////
+/*
+@   dst : dst = a*b (mod)
+*/
+void gf2m_mulmod(gf2m* dst, gf2m* a, gf2m* b, gf2m* gf2m_mod, gf2* mod)
+{
+    gf2m Q, tmp;
+    gf2m_init(&Q, 1);
+    gf2m_init(&tmp, 1);
+    gf2m_mul(&tmp, a, b, mod);
+    gf2m_long_division(&Q, dst, &tmp, gf2m_mod, mod);
 
 }
 /////////////////////////////////////////////////////////////////////
@@ -403,14 +416,15 @@ void gf2m_gcd(gf2m* gcd, gf2m* a, gf2m* b, gf2* mod)
 @   gcd : a*a_inv + b*b_inv
 @   (a,b)입력. b는 goppa poly(기약), (a_inv,b_inv)출력.
 */
-void gf2m_xgcd(gf2m* gcd, gf2m* a, gf2m* b, gf2m* a_inv, gf2m* b_inv, gf2m* mod)
+void gf2m_xgcd(gf2m* gcd, gf2m* a, gf2m* b, gf2m* a_inv, gf2m* b_inv, gf2* mod)
 {
     gf2m t0, t1, t2;
     gf2m v0, v1, v2;
     gf2m u0, u1, u2;
     gf2m R, Q;
-    gf2m tmp, tmp2, tmp3;
-
+    gf2m tmp;
+    gf2 y, gcd_inv;
+    gf2 gcd_tmp;
 
     int len = (a->deg <= b->deg) ? 2*b->deg : 2*a->deg;
 
@@ -437,13 +451,6 @@ void gf2m_xgcd(gf2m* gcd, gf2m* a, gf2m* b, gf2m* a_inv, gf2m* b_inv, gf2m* mod)
         gf2m_copy(&t0, &t1);             //t0 = t1
 
         gf2m_long_division(&Q, &R, &t2, &t1, mod); // R = t2%t1
-        /*
-        printf("Q, R, t2, t1\n");
-        fqt_print(&Q);
-        fqt_print(&R);
-        fqt_print(&t2);
-        fqt_print(&t1);
-        */
         gf2m_copy(&t1, &R);              //t1 = R
 
         gf2m_set_zero(&Q);
@@ -472,23 +479,245 @@ void gf2m_xgcd(gf2m* gcd, gf2m* a, gf2m* b, gf2m* a_inv, gf2m* b_inv, gf2m* mod)
 
     gf2m_fit_len(&u0);
     gf2m_fit_len(&v0);
-    //printf("마지막 u0, u1\n");
-    //fqt_print(&u0);
-    //fqt_print(&u1);
 
     gf2m_copy(gcd, &t0);         //gcd = t0
 
-    gf2 y, gcd_inv;
-    gf2 gcd_tmp;
-    gf2_init(&gcd_inv, mod->deg-1);
+    gf2_init(&gcd_inv, mod->deg-1); //gcd의 역원을 곱하여 반환
     gf2_xgcd(&gcd_tmp, &gcd_inv, &y, &gcd->term[0], mod);
-    //printf("gcd의 역원\n");
-    //fq_print(&gcd_inv);
 
-    //gcd 역원 곱하기. 이거다.
     gf2m_mul_gf2_element(a_inv, &u0, &gcd_inv, mod);
     gf2m_mul_gf2_element(b_inv, &v0, &gcd_inv, mod);
 
     gf2m_fit_len(a_inv);    
     
 }
+/////////////////////////////////////////////////////////////////////
+/*
+@   dst = src^2
+*/
+void gf2m_square(gf2m* dst, gf2m* src, gf2* mod)
+{
+    int i;
+    gf2 tmp;
+
+    if( gf2m_is_zero(src) == ZERO)
+    {
+        gf2m_set_zero(dst);
+        return ;
+    } 
+
+    if( gf2m_is_one(src) == ONE)
+    {
+        gf2m_set_one(dst);
+        return ;
+    }
+
+    gf2_init(&tmp, 1);
+    dst->deg = src->deg*2;
+
+    for(i=src->deg; i>=0; i--)
+    {
+        if(gf2_is_zero(&src->term[i]) != 0)
+        {
+            gf2_squaremod(&tmp, &(src->term[i]), mod);
+            gf2m_set_index(dst, &tmp, i*2);
+        }
+    }
+
+    gf2m_fit_len(dst);
+}
+/////////////////////////////////////////////////////////////////////
+/*
+@   dst = src^2 (mod)
+*/
+void gf2m_squaremod(gf2m* dst, gf2m* src, gf2m* gf2m_mod, gf2* mod)
+{
+    gf2m Q,R;
+    gf2m tmp;
+
+    gf2m_init(&Q, 1);
+    gf2m_init(&R, 1);
+    gf2m_init(&tmp, 1);
+
+    gf2m_square(&tmp, src, mod);
+    gf2m_long_division(&Q, &R, &tmp, gf2m_mod, mod);
+    gf2m_copy(dst, &R);
+
+}
+/////////////////////////////////////////////////////////////////////
+void gf2m_left_to_right_mod(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod, int e)
+{
+    gf2m pow_tmp, pow_tmp2;
+    gf2m Q, R;
+
+    int tmp;
+    int i,len;
+    int e_tmp = e;
+
+    gf2m_init(&pow_tmp, 1);
+    gf2m_init(&pow_tmp2, 1);
+    gf2m_init(&Q, a->deg);
+    gf2m_init(&R, a->deg);
+
+    tmp = e_tmp;
+    binary_len(e_tmp, len);    //비트 길이 반환
+
+    gf2m_set_one(&pow_tmp);
+    for(i=len-1; i>=0; i--)
+    {
+        gf2m_set_zero(&pow_tmp2);
+        gf2m_square(&pow_tmp2, &pow_tmp, mod);
+        gf2m_fit_len(&pow_tmp2);
+        gf2m_long_division(&Q, &R, &pow_tmp2, gf2m_mod, mod);
+        gf2m_copy(&pow_tmp2, &R);
+        if(((tmp>>i) & 0x1) == 1) //미확인
+        {
+            gf2m_set_zero(&pow_tmp);
+            gf2m_mulmod(&pow_tmp, &pow_tmp2, a, gf2m_mod, mod);
+        }
+        else
+        {
+            gf2m_copy(&pow_tmp, &pow_tmp2);
+        }
+    }
+    gf2m_copy(dst, &pow_tmp);
+    gf2m_fit_len(dst);
+}
+/////////////////////////////////////////////////////////////////////
+/*
+@   dst : dst = arc^{2^e} mod (mod)
+*/
+void gf2m_repeated_squaremod(gf2m* dst, gf2m* src, int e, gf2m* gf2m_mod, gf2* mod)
+{
+    int i = 0;
+    gf2m tmp, tmp2;
+ 
+    if(e == 0)
+    {
+        gf2m_copy(dst, src);
+        return;
+    }
+
+    gf2m_init(&tmp, 1);
+    gf2m_init(&tmp2, 1);
+
+    gf2m_copy(&tmp, src);
+    while(i < e)
+    {
+        gf2m_squaremod(&tmp2, &tmp, gf2m_mod, mod);
+        gf2m_copy(&tmp, &tmp2);
+        i++;
+    }
+    gf2m_copy(dst, &tmp);
+}
+/////////////////////////////////////////////////////////////////////
+void gf2m_powmod(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod, int e)
+{
+    gf2m Q, R;
+    gf2m tmp;
+
+    gf2m_init(&Q, a->deg);
+    gf2m_init(&R, a->deg);
+    gf2m_init(&tmp, a->deg);
+
+    if(e == 0)
+    {
+        gf2m_set_one(dst);
+    }
+    if(e == 1)
+    {
+        gf2m_long_division(&Q, &R, a, gf2m_mod, mod);
+        gf2m_copy(dst, &R);
+    }
+    else if( e == 2)
+    {
+        gf2m_square(&tmp, a, mod);
+        gf2m_long_division(&Q, &R, &tmp, gf2m_mod, mod);
+        gf2m_copy(dst, &R);
+    }
+    else
+    {
+        gf2m_left_to_right_mod(dst, a, gf2m_mod, mod, e);
+    }
+    
+    gf2m_fit_len(dst);
+
+}
+/////////////////////////////////////////////////////////////////////
+/*
+@   gf2m 기약다항식 생성하는 함수
+@   dst : 기약다항식
+@     t : t차 ( gf2m )
+*/
+int gf2m_generate_irreducible(gf2m* dst, gf2* mod, int t)
+{
+    return SUCCESS;
+}
+/////////////////////////////////////////////////////////////////////
+/*
+@   polynomial 제곱근 연산 방법. 사전 계산 X
+@   dst : 제곱근 결과값
+@     a : 입력값
+@   gf2m_mod : modular
+@   index : 지수 index
+*/
+void gf2m_square_root(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod)
+{
+    int i, index;
+    gf2m Xi, Ri;
+    gf2m Sq, Sq_root;
+    gf2m Sq_odd, Sq_even;
+    gf2m Sq_tmp, Sq_tmp2;
+
+    gf2m X;
+    gf2 gf2_X;
+    gf2 gf2_tmp;
+
+    gf2_init(&gf2_tmp, mod->deg-1);
+    gf2_init(&gf2_X, mod->deg);
+    gf2m_init(&X, 1);
+    gf2_set_index(&gf2_X, 0);         //fq_X <- 'X'
+    gf2m_set_index(&X, &gf2_X, 1);    //X <-fq_X
+    gf2m_init(&Sq, 1);
+    gf2m_init(&Sq_root, 1);
+    gf2m_init(&Sq_tmp, 1);
+    gf2m_init(&Sq_tmp, 2);
+    gf2m_init(&Sq_odd, 1);
+    gf2m_init(&Sq_even, 1);
+    gf2m_init(&Xi, 1);
+
+    gf2m_set_index(&Sq, &gf2_X, 1);  //(gf2m)X 생성.
+    
+    //Sq <- X^{2^{mt-1}} mod (gf2m_mod)
+    index = (mod->deg  * gf2m_mod->deg) - 1;
+    gf2m_repeated_squaremod(&Sq, &X, index, gf2m_mod, mod);
+    
+    for(i=0; i<=a->deg; i++)
+    {
+        gf2_powmod(&gf2_tmp, &(a->term[i]), (1<<(mod->deg-1)), mod);
+        if((i % 2) == 0)
+        {
+            gf2m_set_index(&Sq_even, &gf2_tmp, i/2);
+            gf2m_fit_len(&Sq_even);
+        }
+        else //odd
+        {
+            //Rx <- X^i*Sq mod (gf2m_mod)
+            gf2m_powmod(&Xi, &X, gf2m_mod, mod, i/2);
+            gf2m_mulmod(&Ri, &Sq, &Xi, gf2m_mod, mod);
+            gf2m_mul_gf2_element(&Sq_odd, &Ri, &gf2_tmp, mod);
+        }
+        //누적 덧셈
+        gf2m_add(&Sq_tmp, &Sq_even, &Sq_odd);
+        gf2m_add(&Sq_root, &Sq_tmp2, &Sq_tmp);
+        gf2m_copy(&Sq_tmp2, &Sq_root);
+
+        gf2m_set_zero(&Sq_even);
+        gf2m_set_zero(&Sq_odd);
+        gf2_set_zero(&gf2_tmp);
+    }
+    gf2m_fit_len(&Sq_root);
+    gf2m_copy(dst, &Sq_root);
+}
+
+
