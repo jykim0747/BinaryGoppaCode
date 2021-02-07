@@ -36,7 +36,13 @@ void gf2m_mul_gf2_element(gf2m* dst, gf2m* src, gf2* element, gf2* mod);
 void gf2m_shift(gf2m* dst, gf2m* src, int shift);
 int gf2m_long_division(gf2m* Q, gf2m* R, gf2m* A, gf2m* B, gf2* mod);
 void gf2m_gcd(gf2m* gcd, gf2m* a, gf2m* b, gf2* mod);
-void gf2m_xgcd(gf2m* gcd, gf2m* a, gf2m* b, gf2m* a_inv, gf2m* b_inv, gf2m* mod);
+void gf2m_xgcd(gf2m* gcd, gf2m* a, gf2m* b, gf2m* a_inv, gf2m* b_inv, gf2* mod);
+void gf2m_square(gf2m* dst, gf2m* src, gf2* mod);
+void gf2m_squaremod(gf2m* dst, gf2m* src, gf2m* gf2m_mod, gf2* mod);
+void gf2m_repeated_squaremod(gf2m* dst, gf2m* src, int e, gf2m* gf2m_mod, gf2* mod);
+void gf2m_square_root(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod);
+void gf2m_left_to_right_mod(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod, int e);
+void gf2m_powmod(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod, int e);
 
 void test_gf2m_math_operation();
 
