@@ -31,6 +31,7 @@ typedef struct
 
 void gf2_init(gf2* a, int t);
 void gf2_print(gf2* a);
+void gf2_print_pretty(gf2* a);
 void gf2_random_gen(gf2* a);
 void gf2_random_gen_fix(gf2* a);
 void gf2_fit_len(gf2* a);

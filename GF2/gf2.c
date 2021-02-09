@@ -52,6 +52,43 @@ void gf2_print(gf2* a)
 
 }
 /////////////////////////////////////////////////////////////////////
+void gf2_print_pretty(gf2* a)
+{
+    int q  = a->deg / 8;
+    int qr = a->deg % 8;
+
+    int i = q;
+    int j;
+    int tmp;
+
+    if(gf2_is_zero(a) == ZERO)
+    {
+        printf("0");
+        return;
+    }
+
+    tmp = a->binary[q];
+    for(j=qr; j>=0; j--)
+    {
+        if((tmp>>j)&0x01)
+            printf("z^%d+", 8*q+j);
+    }
+
+    for(i=q-1; i>=0; i--)
+    {   
+        tmp = a->binary[i];
+        for(j=7; j>=0; j--)
+        {   
+            if((tmp>>j)&0x01)
+            {
+                printf("z^%d+", i*8+j);
+            }
+        }
+    }
+    printf("\b");
+
+}
+/////////////////////////////////////////////////////////////////////
 /*
 @   fitting length
 */
