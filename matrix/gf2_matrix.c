@@ -65,7 +65,6 @@ void generate_random_gf2_matrix(gf2_MAT mat)
     for(i=0; i<mat->r; ++i){
         for(j=0; j<mat->c; ++j){
             gf2_random_gen(&mat->entries[i*mat->r + j]);
-            //gf2_print(&mat->entries[i*mat->r + j]);
         }
     }
 
@@ -84,4 +83,16 @@ void gf2_matrix_free(gf2_MAT mat)
         free(mat->data);
     } else if (mat->r != 0)
         free(mat->data);
+}
+
+void gf2_matrix_swap_rows(gf2_MAT mat, int row1, int row2)
+{
+    if (row1 != row2)
+    {
+        gf2 * u;
+
+        u = mat->data[row2];
+        mat->data[row2] = mat->data[row1];
+        mat->data[row1] = u; 
+    }
 }
