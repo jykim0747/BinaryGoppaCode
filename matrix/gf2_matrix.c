@@ -64,7 +64,7 @@ void generate_random_gf2_matrix(gf2_MAT mat)
 
     for(i=0; i<mat->r; ++i){
         for(j=0; j<mat->c; ++j){
-            gf2_random_gen(&mat->entries[i*mat->r + j]);
+            gf2_random_gen((mat->data[i] + j));
         }
     }
 
@@ -95,4 +95,60 @@ void gf2_matrix_swap_rows(gf2_MAT mat, int row1, int row2)
         mat->data[row2] = mat->data[row1];
         mat->data[row1] = u; 
     }
+}
+
+void gf2_matrix_copy(gf2_MAT dst, gf2_MAT src)
+{
+    int i, j;
+
+    if((src == NULL) || (dst == NULL))
+    {
+        return;
+    }
+
+    if((src->r != dst->r) || (src->c != dst->c))
+    {
+        return;
+    }
+
+    for(i=0; i<src->r; ++i)
+        for(j=0; j<src->c; ++j)
+            gf2_copy(dst->data[i] + j, src->data[i]+j);
+
+}
+
+int gf2_matrix_has_zero_rows(gf2_MAT mat)
+{
+    int i, j, res;
+    int count;
+
+    for(i=0; i<mat->r; ++i){
+        count = 0;
+        for(j=0; j<mat->c; ++j){
+            if(gf2_is_zero(gf2_mat_entry(mat, i, j)) == ZERO)
+                count++;
+        }
+        if(count == mat->c)
+            return ZERO;   
+    }
+
+    return NOT_ZERO;
+}
+
+/*
+* mat->data[row1] = mat->data[row1] + mat->data[row2]
+*/
+void gf2_matrix_add_row(gf2_MAT mat, int row1, int row2)
+{
+    int i;
+    for(i=0; i<mat->c; ++i)
+        gf2_add(gf2_mat_entry(mat, row1, i), gf2_mat_entry(mat, row1, i), gf2_mat_entry(mat, row2, i));
+
+}
+
+int gf2_matrix_echelon(gf2_MAT mat_ech, gf2_MAT mat)
+{
+    int rank = 0;
+
+    return rank;
 }
