@@ -4,6 +4,9 @@
 
 void bmatrix_init(BMAT mat, int rows, int cols)
 {
+    if((rows == 0) || (cols == 0))
+        return;
+
     mat->cnum = (cols + 7) / 8;
 
     if (rows != 0 && cols != 0) /* Allocate space for r*c small entries */
@@ -83,4 +86,96 @@ void bmatrix_swap_rows(BMAT mat, int row1, int row2)
         mat->data[row2] = mat->data[row1];
         mat->data[row1] = u; 
     }
+}
+
+void bmatrix_copy(BMAT dst, BMAT src)
+{
+    int i, j;
+
+    if((src == NULL) || (dst == NULL))
+    {
+        return;
+    }
+
+    if((src->r != dst->r) || (src->c != dst->c))
+    {
+        return;
+    }
+
+    for(i=0; i<src->r; ++i)
+        for(j=0; j<src->cnum; ++j)
+            b_mat_entry(dst, i, j) = b_mat_entry(src, i, j);
+
+}
+
+int bmatrix_has_zero_rows(BMAT mat)
+{
+    int i, j, res;
+    int count;
+
+    for(i=0; i<mat->r; ++i){
+        count = 0;
+        for(j=0; j<mat->cnum; ++j){
+            if(b_mat_entry(mat, i, j) == ZERO)
+                count++;
+        }
+        if(count == mat->cnum)
+            return ZERO;   
+    }
+
+    return NOT_ZERO;
+}
+
+/*
+* mat->data[row1] = mat->data[row1] ^ mat->data[row2]
+*/
+void bmatrix_add_row(BMAT mat, int row1, int row2)
+{
+    int i;
+    for(i=0; i<mat->cnum; ++i)
+        b_mat_entry(mat, row1, i) ^= b_mat_entry(mat, row2, i);
+}
+
+int bmatrix_echelon(BMAT mat_ech, BMAT mat)
+{
+    BMAT tmp;
+    int i, j, k, count;
+
+    bmatrix_init(tmp, mat->r, mat->c);
+    bmatrix_copy(tmp, mat);
+
+    if(bmatrix_has_zero_rows(tmp) == ZERO)
+    {
+        printf("has zero rows\n");
+        return FAILURE;
+    }
+
+    for(i=0; i<mat->r; ++i)
+    {
+        int iq = i / 8;
+        int ir = i % 8;
+        count = 0;
+        for(j = i; j<mat->r; j++)
+        {
+            if((b_mat_entry(tmp, j, iq)>>(7-ir)) & 0x01)
+            {
+                if(count == 0){
+                    bmatrix_swap_rows(tmp, i, j);
+                    count = 1;
+                }
+                else{
+                    bmatrix_add_row(tmp, j, i);
+                }
+            }
+        }
+        for(k=0; k<i; k++){
+            if((b_mat_entry(tmp, k, iq)>>(7-ir)) & 0x01){
+                bmatrix_add_row(tmp, k, i);
+            }
+        }
+    }
+    bmatrix_copy(mat_ech, tmp);
+    bmatrix_free(tmp);
+
+    return SUCCESS;
 }
