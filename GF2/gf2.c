@@ -1,7 +1,7 @@
 #include "gf2.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "bmatrix.h"
 /*
 @   a : Fq element
 @   t : degree of a (with constant) (ex. z^2+z+1 -> 3) maximum degree is 14 (z^13)
@@ -629,6 +629,7 @@ void gf2_square_root(gf2* dst, gf2* a, gf2* mod)
 /////////////////////////////////////////////////////////////////////
 /*
 @   return IRREDUCIBLE or REDUCIBLE
+@   Berlekamp algorithm 으로 수정 예정
 */
 int gf2_is_irreducible(gf2* src)
 {
@@ -653,18 +654,28 @@ int gf2_is_irreducible(gf2* src)
     gf2_copy(&f, src);
     gf2_set_index(&x, 1);   /* x = X */
     
+    printf("print f :");    gf2_print(&f);
     for(i=1; i<f.deg; i++)
     {
+        printf("src deg %d %d\n", f.deg, i);
         /* h = gcd(f, x^{2^i} -x mod(f)) */
         gf2_repeated_squaremod(&xpow, &x, i, &f);
+        printf("tmp square :");    gf2_print(&xpow);
         gf2_addmod(&tmp, &xpow, &x, &f);    /* x mod (f) */
+        printf("tmp square add :");    gf2_print(&tmp);
         gf2_set_zero(&xpow);
         if( gf2_is_zero(&tmp) == ZERO)
         {
-            count ++;
+            gf2_gcd(&gcd, &f, &tmp);
+            printf("gcd :");    gf2_print(&gcd);
+            
+            //수정중
+
+            count++;
             break;
         }
         gf2_gcd(&gcd, &f, &tmp);
+        printf("gcd :");    gf2_print(&gcd);
         if( gf2_is_one(&gcd) == NOT_ONE)
         {
             gf2_long_division(&Q, &R, &f, &gcd);
@@ -706,9 +717,19 @@ void gf2_generate_irreducible(gf2* src, int degree)
 
     gf2_init(&tmp, degree);
     
-    while(res != IRREDUCIBLE)
+    //while(res != IRREDUCIBLE)
     {
-        gf2_random_gen_fix(&tmp);
+        //gf2_random_gen_fix(&tmp);
+        //z^6 + z^5 + z^4 + z^3 + z^2 + z + 1 = (z^3 + z + 1) * (z^3 + z^2 + 1) irre로 나옴
+        gf2_set_index(&tmp, 6);
+        gf2_set_index(&tmp, 5);
+        gf2_set_index(&tmp, 4);
+        gf2_set_index(&tmp, 3);
+        gf2_set_index(&tmp, 2);
+        gf2_set_index(&tmp, 1);
+        gf2_set_index(&tmp, 0);
+        gf2_fit_len(&tmp);
+
         res = gf2_is_irreducible(&tmp);
     }
     gf2_copy(src, &tmp);
@@ -781,4 +802,28 @@ void gf2_xgcd(gf2* gcd, gf2* x, gf2* y, gf2* a, gf2* b)
     gf2_copy(y, &v0);
     gf2_copy(gcd, &t0);
 
+}
+
+/*
+@     src : 입력값
+@     return : factoring 갯수. 없을 경우 1 반환
+*/
+int  gf2_berlekamp_factoring(gf2* src)
+{
+    gf2 X;
+    gf2 X_powering;
+    BMAT B;
+    int i;
+
+    bmatrix_init(&B, src->deg, src->deg );
+    gf2_init(&X, 1);
+
+    for(i=0; i<src->deg; ++i){  //미분값 차수까지
+        gf2_repeated_squaremod(&X_powering, &X, i, src);
+        //bmatrix_set_gf2(&B, &X_powering, i);
+    }
+
+    bmatrix_free(&B);
+
+    return 1;
 }
