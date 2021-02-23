@@ -1,6 +1,8 @@
-#include "matrix.h"
+#include "bmatrix.h"
 #include "error.h"
-#include "stdlib.h"
+#include <stdlib.h>
+#include <stdio.h>
+
 
 void bmatrix_init(BMAT mat, int rows, int cols)
 {
@@ -110,7 +112,7 @@ void bmatrix_copy(BMAT dst, BMAT src)
 
 int bmatrix_has_zero_rows(BMAT mat)
 {
-    int i, j, res;
+    int i, j;
     int count;
 
     for(i=0; i<mat->r; ++i){
@@ -178,4 +180,21 @@ int bmatrix_echelon(BMAT mat_ech, BMAT mat)
     bmatrix_free(tmp);
 
     return SUCCESS;
+}
+
+void bmatrix_set_gf2(BMAT mat, const gf2 src, int row)
+{
+    int i, j;
+    int qq = src.deg / 8;
+    int qr = src.deg % 8;
+
+    for(i=qq; i>=0; i--)
+    {
+        for(j=7; j>=0; j--)
+        {
+            if((src.binary[i]>>(7-j)) & 0x01){
+                b_mat_entry(mat, row, i) ^= (1<<(j));
+            }
+        }
+    }
 }
