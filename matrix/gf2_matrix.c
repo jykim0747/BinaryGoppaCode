@@ -1,4 +1,4 @@
-#include "matrix.h"
+#include "gf2_matrix.h"
 #include "error.h"
 #include "stdlib.h"
 
@@ -75,7 +75,6 @@ void gf2_matrix_free(gf2_MAT mat)
     if (mat->entries)
     {
         int i;
-
         for (i = 0; i < mat->r * mat->c; i++)
             gf2_set_zero(mat->entries + i);
 
@@ -117,9 +116,31 @@ void gf2_matrix_copy(gf2_MAT dst, gf2_MAT src)
 
 }
 
+/*
+*   dst (row) <- src(row)
+*/
+void gf2_matrix_copy_row(gf2_MAT dst, gf2_MAT src, int row)
+{
+    int j;
+
+    if((src == NULL) || (dst == NULL))
+    {
+        return;
+    }
+
+    if((src->r != dst->r) || (src->c != dst->c))
+    {
+        return;
+    }
+
+    for(j=0; j<src->c; ++j)
+        gf2_copy(dst->data[row] + j, src->data[row]+j);
+
+}
+
 int gf2_matrix_has_zero_rows(gf2_MAT mat)
 {
-    int i, j, res;
+    int i, j;
     int count;
 
     for(i=0; i<mat->r; ++i){
@@ -143,12 +164,74 @@ void gf2_matrix_add_row(gf2_MAT mat, int row1, int row2)
     int i;
     for(i=0; i<mat->c; ++i)
         gf2_add(gf2_mat_entry(mat, row1, i), gf2_mat_entry(mat, row1, i), gf2_mat_entry(mat, row2, i));
+}
+
+/*
+* mat->data[row] = mat->data[row] * gf2 (mod)
+*/
+void gf2_matrix_mul_row(gf2_MAT mat, int row, gf2* src, gf2* mod)
+{
+    int i;
+    for(i=0; i<mat->c; ++i)
+        gf2_mulmod(gf2_mat_entry(mat, row, i), gf2_mat_entry(mat, row, i), src, mod);
 
 }
 
-int gf2_matrix_echelon(gf2_MAT mat_ech, gf2_MAT mat)
+/*
+* gf2_matrix echelon form
+*/
+int gf2_matrix_echelon(gf2_MAT mat_ech, gf2_MAT mat, gf2* mod)
 {
-    int rank = 0;
+    int i,j,k;
+    int row = mat->r;
 
-    return rank;
+    gf2 gcd, tmp, inv;
+    gf2_MAT mat_tmp;
+
+    if(gf2_matrix_has_zero_rows(mat) == ZERO)
+    {
+        printf("has zero rows\n");
+        return FAILURE;
+    }
+
+    gf2_init(&inv, 1);
+    gf2_init(&gcd, 1);
+    gf2_matrix_init(mat_tmp, mat->r, mat->c, mod->deg);
+    gf2_matrix_copy(mat_tmp, mat);
+
+    for(i=0; i<row; i++)
+    {
+        if( gf2_is_zero(gf2_mat_entry(mat_tmp, i,i)) == ZERO)
+        {
+            for(j=i+1; j<row; j++)
+            {
+                if( gf2_is_zero(gf2_mat_entry(mat_tmp, j,i)) != ZERO)
+                {
+                    gf2_matrix_swap_rows(mat_tmp, i, j);
+                    break;
+                }
+            }
+        }//if
+        
+        gf2_fit_len(gf2_mat_entry(mat_tmp, i,i));
+        
+        gf2_xgcd(&gcd, &inv, &tmp, gf2_mat_entry(mat_tmp, i,i), mod);
+        gf2_matrix_mul_row(mat_tmp, i, &inv, mod);
+        gf2_matrix_copy_row(mat, mat_tmp, i);
+
+        for(k = 0; k<row; k++)
+        {
+            if(k == i)
+                continue;
+            if( gf2_is_zero(gf2_mat_entry(mat_tmp, k, i)) != ZERO)
+            {
+                gf2_matrix_mul_row(mat_tmp, i, gf2_mat_entry(mat_tmp, k, i), mod);
+                gf2_matrix_add_row(mat_tmp, k, i);
+                gf2_matrix_copy_row(mat_tmp, mat, i);
+            }
+        }
+    }
+    gf2_matrix_copy(mat_ech, mat_tmp);
+
+    return SUCCESS;
 }

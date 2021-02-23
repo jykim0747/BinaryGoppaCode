@@ -1,4 +1,5 @@
-#include "matrix.h"
+#include "bmatrix.h"
+#include "gf2_matrix.h"
 
 void test_init_matrix()
 {
@@ -55,6 +56,31 @@ void test_copy_matrix()
     generate_random_gf2_matrix(A);
     gf2_matrix_print(A);
     gf2_matrix_copy(B, A);
+    gf2_matrix_print(B);
+
+    gf2_matrix_free(A);
+    gf2_matrix_free(B);
+}
+
+void test_echelon_form_matrix()
+{
+    gf2_MAT A, B;
+    gf2 mod;
+    int row = 5;
+    int col = 7;
+    int m = 3;
+    
+    gf2_init(&mod, m);
+    gf2_generate_irreducible(&mod, m);
+
+    gf2_matrix_init(A, row, col, m - 1);
+    gf2_matrix_init(B, row, col, m - 1);
+    
+    generate_random_gf2_matrix(A);
+    gf2_matrix_print(A);
+
+    printf("echelon form\n");
+    gf2_matrix_echelon(B, A, &mod);
     gf2_matrix_print(B);
 
     gf2_matrix_free(A);
@@ -133,15 +159,42 @@ void test_echelon_form_bmatrix()
     bmatrix_free(B);
 }
 
-void test_matrix_operation()
+void test_gf2_to_bmat()
+{
+    BMAT A;
+    gf2 B;
+
+     gf2_init(&B, 17);
+    // gf2_set_index(&B, 4);
+    // gf2_set_index(&B, 2);
+    // gf2_set_index(&B, 1);
+    // gf2_set_index(&B, 0);
+    gf2_random_gen_fix(&B);
+
+    printf("A = "); gf2_print(&B);
+
+    bmatrix_init(A, B.deg, B.deg);
+    bmatrix_set_gf2(A, B, 1);
+    bmatrix_print(A);
+
+    bmatrix_free(A);
+}
+
+
+void test_gf2_matrix_operation()
 {
     //test_init_matrix();
     //test_has_zero_matrix();
     //test_copy_matrix();
+    test_echelon_form_matrix();
 
+}
+
+void test_bmatrix_operation()
+{
     //test_init_bmatrix();
     //test_has_zero_bmatrix();
     //test_copy_bmatrix();
-    test_echelon_form_bmatrix();
-
+    //test_echelon_form_bmatrix();
+    test_gf2_to_bmat();
 }

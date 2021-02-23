@@ -1,4 +1,5 @@
 #include "gf2m.h"
+#include "gf2_matrix.h"
 
 
 /////////////////////////////////////////////////////////////////////
@@ -651,6 +652,88 @@ void gf2m_powmod(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod, int e)
 */
 int gf2m_generate_irreducible(gf2m* dst, gf2* mod, int t)
 {
+
+    gf2 irre;   //t차 기약 다항식
+    gf2m gf2m_mod;
+    gf2m gf2m_tmp, gf2m_tmp2;
+    gf2_MAT mat, ech_mat, mat_tmp;
+
+    int i, j;
+    int m = mod->deg - 1;
+    int count = 0;
+    int row = t;
+    int col = t+1;
+
+    gf2_init(&irre, t);
+    gf2_generate_irreducible(&irre, t - 1);
+    gf2_print_pretty(&irre);
+    
+    // gf2_matrix_init(&mat, row, col, m);
+    // gf2_matrix_init(&mat_tmp, row, col, m);
+    // gf2_matrix_init(&ech_mat, row, col, m);
+
+    
+    // gf2m_init(&gf2m_mod, t);
+    // gf2m_init(&gf2m_tmp, t - 1);
+    // gf2m_init(&gf2m_tmp2, t - 1);
+
+
+    // /* gf2 to gf2m */
+    // {
+    //     int qq = irre.deg / 8;
+    //     int qr = irre.deg % 8;
+    //     for(j = qr; j>=0; j--)
+    //     {
+    //         if((irre.binary[qq]>>j) & 0x01)
+    //             gf2_set_one(&gf2m_mod.term[qq*8 + j]);
+    //     }
+    //     for(i = qq - 1; i>=0; i--)
+    //         for(j = 7; j>=0; j--)
+    //             if((irre.binary[i]>>j) & 0x01)
+    //                 gf2_set_one(&gf2m_mod.term[i*8 + j]);
+    // }
+    // gf2m_fit_len(&gf2m_mod);
+
+    // do{
+    //     gf2m_random_gen(&gf2m_tmp, m);
+    //     gf2m_set_one(&gf2m_tmp2);
+    //     for(i=0; i<col; i++)
+    //     {
+    //         for(j=0; j<row; j++)
+    //         {
+    //             *gf2_mat_entry(mat, j, i) = (gf2m_tmp2.term[j]);
+    //         }
+    //         gf2m_mulmod(&gf2m_tmp2, &gf2m_tmp2, &gf2m_tmp, &gf2m_mod, mod);
+    //     }
+    //     gf2_matrix_echelon(ech_mat, mat, mod);
+
+    //     count = 0;
+    //     for(i=0; i<row; ++i)
+    //     {
+    //         if(gf2_is_one(gf2_mat_entry(mat, i, i)) == ONE)
+    //             count ++;
+    //     }
+
+    // }while(count != row);
+
+    // for(i=0; i<t; i++)
+    // {
+    //     gf2_copy(&dst->term[i], gf2_mat_entry(ech_mat, i, col-1));
+    // }
+    // gf2_set_one(&dst->term[t]);
+    // dst->deg = t;
+
+    // gf2_matrix_print(mat);
+    // printf("종료\n");
+    // gf2_matrix_print(ech_mat);
+    
+    // printf("기약다항식\n");
+    // gf2m_print(dst);
+    
+    // gf2_matrix_free(ech_mat);
+    // gf2_matrix_free(mat);
+    // gf2_matrix_free(mat_tmp);
+
     return SUCCESS;
 }
 /////////////////////////////////////////////////////////////////////

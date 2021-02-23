@@ -341,6 +341,29 @@ void test_gf2m_squareroot()
 
 }
 
+void test_gf2_generate_irreducible_poly()
+{
+    gf2m A, gf2m_mod;
+    gf2 mod;
+    int m = 13;
+    int t = 6;
+    
+    /* z^13 + z^12 + z^10 + z^9 + z^7 + z^4 + 1, irreducible */
+    gf2_init(&mod, m);
+    gf2_set_index(&mod, 13);
+    gf2_set_index(&mod, 12);
+    gf2_set_index(&mod, 10);
+    gf2_set_index(&mod, 9);
+    gf2_set_index(&mod, 7);
+    gf2_set_index(&mod, 4);
+    gf2_set_index(&mod, 0);
+
+    gf2m_init(&A, t);
+
+    gf2m_generate_irreducible(&A, &mod, t);
+
+}
+
 void test_gf2m_math_operation(){
     //test_gf2m_init();
     //test_gf2m_add();
@@ -352,5 +375,5 @@ void test_gf2m_math_operation(){
     //test_gf2m_xgcd();
     //test_gf2m_square();
     //test_gf2m_powmod();
-    
+    test_gf2_generate_irreducible_poly();
 }

@@ -3,8 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "error.h"
 
-#define size 100
+#define size 250
 
 /* GF2 element struct */
 typedef struct 
@@ -17,16 +18,7 @@ typedef struct
     for((Y)=0; (X)>0; (Y)++) (X) /= 2;\
 }
 
-#define ZERO        0000
-#define ONE         0001
-#define NOT_ZERO    0002
-#define NOT_ONE     0003
 
-#define FAILURE     0020
-#define SUCCESS     0021
-
-#define IRREDUCIBLE 0030
-#define REDUCIBLE   0031
 
 
 void gf2_init(gf2* a, int t);
@@ -65,6 +57,7 @@ int gf2_is_irreducible(gf2* src);
 void gf2_generate_irreducible(gf2* src, int degree);
 
 void gf2_xgcd(gf2* gcd, gf2* x, gf2* y, gf2* a, gf2* b);
+int  gf2_berlekamp_factoring(gf2* src);
 
 void test_gf2_init();
 void test_gf2_math_operation();

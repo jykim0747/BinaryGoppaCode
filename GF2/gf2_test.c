@@ -312,6 +312,20 @@ static void test_gf2_xgcd()
 
 }
 
+static void test_gf2_belekamp_factoring()
+{
+    gf2 A;
+    int num;
+
+    gf2_init(&A, 5);
+    gf2_set_index(&A, 4);
+    gf2_set_index(&A, 2);
+    gf2_set_index(&A, 1);
+    gf2_set_index(&A, 0);
+    printf("A = "); gf2_print_pretty(&A);
+    num = gf2_berlekamp_factoring(&A);
+}
+
 void test_gf2_math_operation()
 {
     /*
@@ -347,7 +361,10 @@ void test_gf2_math_operation()
     
     printf("Start generate_irreducible test \n");
     test_gf2_generate_irreducible();
-*/
+
     printf("Start xgcd test \n");
     test_gf2_xgcd();
+*/
+    printf("Start belekamp_factoring test \n");
+    test_gf2_belekamp_factoring();
 }

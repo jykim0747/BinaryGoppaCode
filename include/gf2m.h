@@ -2,8 +2,9 @@
 #define _GF2M_H_
 
 #include "gf2.h"
+#include "error.h"
 
-#define MAX_DEGREE 150
+#define MAX_DEGREE 300
 
 /* gf2 extension element struct */
 typedef struct 
@@ -43,6 +44,7 @@ void gf2m_repeated_squaremod(gf2m* dst, gf2m* src, int e, gf2m* gf2m_mod, gf2* m
 void gf2m_square_root(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod);
 void gf2m_left_to_right_mod(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod, int e);
 void gf2m_powmod(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod, int e);
+int gf2m_generate_irreducible(gf2m* dst, gf2* mod, int t);
 
 void test_gf2m_math_operation();
 
