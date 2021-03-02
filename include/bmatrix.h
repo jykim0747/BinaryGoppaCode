@@ -28,6 +28,9 @@ void bmatrix_copy(BMAT dst, BMAT src);
 int bmatrix_echelon(BMAT mat_ech, BMAT mat);
 
 void bmatrix_set_gf2(BMAT mat, const gf2 src, int row);
+void bmatrix_generate_identity(BMAT mat);
+void bmatrix_add_identity(BMAT dst, BMAT src);
+int bmatrix_rank(BMAT mat);
 
 void test_bmatrix_operation();
 
