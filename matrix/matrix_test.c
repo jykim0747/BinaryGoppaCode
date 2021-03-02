@@ -180,6 +180,21 @@ void test_gf2_to_bmat()
     bmatrix_free(A);
 }
 
+void test_generate_identity_bmatrix()
+{
+    BMAT A;
+    int row = 7;
+    int col = 7;
+    int rank;
+
+    bmatrix_init(A, row, col);
+    //bmatrix_generate_identity(A);
+    generate_random_bmatrix(A);
+    bmatrix_print(A);
+    rank = bmatrix_rank(A);
+    printf("rank = %d\n", rank);
+    bmatrix_free(A);
+}
 
 void test_gf2_matrix_operation()
 {
@@ -196,5 +211,6 @@ void test_bmatrix_operation()
     //test_has_zero_bmatrix();
     //test_copy_bmatrix();
     //test_echelon_form_bmatrix();
-    test_gf2_to_bmat();
+    //test_gf2_to_bmat();
+    test_generate_identity_bmatrix();
 }

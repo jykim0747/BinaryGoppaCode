@@ -245,7 +245,7 @@ static void test_gf2_is_irreducible_root()
 static void test_gf2_generate_irreducible()
 {
     gf2 A;
-    int m = 128;
+    int m = 6;
 
     gf2_init(&A, m);
     gf2_generate_irreducible(&A, m);
@@ -312,6 +312,24 @@ static void test_gf2_xgcd()
 
 }
 
+static void test_gf2_diff()
+{
+    gf2 A, B;
+
+    gf2_init(&A, 17);
+    gf2_init(&B, 1);
+    gf2_random_gen_fix(&A);
+    // gf2_set_index(&A, 4);
+    // gf2_set_index(&A, 2);
+    // gf2_set_index(&A, 1);
+    // gf2_set_index(&A, 0);
+    // gf2_fit_len(&A);
+    printf("A = "); gf2_print(&A);
+
+    gf2_diff(&B, &A);
+    printf("diff of A = "); gf2_print(&B);
+}
+
 static void test_gf2_belekamp_factoring()
 {
     gf2 A;
@@ -324,6 +342,8 @@ static void test_gf2_belekamp_factoring()
     gf2_set_index(&A, 0);
     printf("A = "); gf2_print_pretty(&A);
     num = gf2_berlekamp_factoring(&A);
+
+    printf("%d factors\n", num);
 }
 
 void test_gf2_math_operation()
@@ -365,6 +385,10 @@ void test_gf2_math_operation()
     printf("Start xgcd test \n");
     test_gf2_xgcd();
 */
+    printf("Start difference test \n");
+    test_gf2_diff();
+/*
     printf("Start belekamp_factoring test \n");
     test_gf2_belekamp_factoring();
+    */
 }

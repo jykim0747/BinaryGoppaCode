@@ -146,11 +146,11 @@ int bmatrix_echelon(BMAT mat_ech, BMAT mat)
     bmatrix_init(tmp, mat->r, mat->c);
     bmatrix_copy(tmp, mat);
 
-    if(bmatrix_has_zero_rows(tmp) == ZERO)
-    {
-        printf("has zero rows\n");
-        return FAILURE;
-    }
+    // if(bmatrix_has_zero_rows(tmp) == ZERO)
+    // {
+    //     printf("has zero rows\n");
+    //     return FAILURE;
+    // }
 
     for(i=0; i<mat->r; ++i)
     {
@@ -186,15 +186,83 @@ void bmatrix_set_gf2(BMAT mat, const gf2 src, int row)
 {
     int i, j;
     int qq = src.deg / 8;
-    int qr = src.deg % 8;
 
     for(i=qq; i>=0; i--)
     {
         for(j=7; j>=0; j--)
         {
             if((src.binary[i]>>(7-j)) & 0x01){
-                b_mat_entry(mat, row, i) ^= (1<<(j));
+                b_mat_entry(mat, row, i) ^= (1<<j);
             }
         }
     }
+}
+
+void bmatrix_generate_identity(BMAT mat)
+{
+    int i,j;
+    int rq = mat->r / 8;
+    int rr = mat->r % 8;
+
+    if(mat->r != mat->c)
+        return;
+
+    for(i=0; i< rq; ++i)
+    {
+        for(j=0; j<8; ++j)
+            b_mat_entry(mat, i*8 + j, i) ^= (1<<(7-j));
+    }
+    
+    for(j=0; j< rr; ++j)
+    {
+        b_mat_entry(mat, rq*8 + j, rq) ^= (1<<(7-j));
+    }
+
+}
+
+/*
+*   src : identity bmatrix
+*/
+void bmatrix_add_identity(BMAT dst, BMAT src)
+{
+    int i, j;
+
+    for(i=0; i<src->r; ++i)
+        for(j=0; j<src->cnum; ++j)
+            b_mat_entry(dst, i, j) ^= b_mat_entry(src, i, j);
+
+}
+
+/*
+*   counting diagonal elements after Gaussian elimination
+*   Sometimes it returns a different result
+*   But I want full rank or not
+*/
+int bmatrix_rank(BMAT mat)
+{
+    int rank = 0;
+    int i, j;
+    BMAT tmp;
+
+    int rq = mat->r / 8;
+    int rr = mat->r % 8;
+
+    bmatrix_init(tmp, mat->r, mat->c);
+    bmatrix_echelon(tmp, mat);
+
+    for(i=0; i< rq; ++i){
+        for(j=0; j<8; ++j){
+            if(((b_mat_entry(tmp, i*8 + j, i) >> (7-j)) & 0x01) == 1)
+                rank++;
+        }
+    }
+    
+    for(j=0; j< rr; ++j){
+        if(((b_mat_entry(tmp, rq*8 + j, rq) >> (7-j)) & 0x01) == 1)
+            rank++;
+    }
+
+    bmatrix_free(tmp);
+
+    return rank;
 }
