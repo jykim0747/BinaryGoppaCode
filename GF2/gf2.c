@@ -637,73 +637,83 @@ int gf2_is_irreducible(gf2* src)
     gf2 f, gcd, Q, R;
     gf2 x, xpow, tmp;
     int count = 0;
+    int factors;
 
     if(src->deg == 0)
     {
         return REDUCIBLE;
     }
 
-    gf2_init(&f, 1);
-    gf2_init(&Q, src->deg);
-    gf2_init(&R, src->deg);
-    gf2_init(&gcd, 1);
-    gf2_init(&x, 1);
-    gf2_init(&xpow, 1);
-    gf2_init(&tmp, 1);
-
-    gf2_copy(&f, src);
-    gf2_set_index(&x, 1);   /* x = X */
-    
-    printf("print f :");    gf2_print(&f);
-    for(i=1; i<f.deg; i++)
-    {
-        printf("src deg %d %d\n", f.deg, i);
-        /* h = gcd(f, x^{2^i} -x mod(f)) */
-        gf2_repeated_squaremod(&xpow, &x, i, &f);
-        printf("tmp square :");    gf2_print(&xpow);
-        gf2_addmod(&tmp, &xpow, &x, &f);    /* x mod (f) */
-        printf("tmp square add :");    gf2_print(&tmp);
-        gf2_set_zero(&xpow);
-        if( gf2_is_zero(&tmp) == ZERO)
-        {
-            gf2_gcd(&gcd, &f, &tmp);
-            printf("gcd :");    gf2_print(&gcd);
-            
-            //수정중
-
-            count++;
-            break;
-        }
-        gf2_gcd(&gcd, &f, &tmp);
-        printf("gcd :");    gf2_print(&gcd);
-        if( gf2_is_one(&gcd) == NOT_ONE)
-        {
-            gf2_long_division(&Q, &R, &f, &gcd);
-            gf2_copy(&f, &Q);
-            count ++;
-            if(count >= 2)
-            {
-                break;
-            }
-        }
-    }
-    
-    /* 자기 자신일 경우와 f/f로 1인경우 고려. */
-    if( (gf2_is_one(&f) == NOT_ONE) && (f.deg != src->deg))
-    {
-        count ++;
-    }
-
-    if(count == 1)
-    {
-        printf("Irreducible\n");
-        return IRREDUCIBLE;
-    }
-    else
-    {
-        printf("Reducible\n");
+    factors = gf2_berlekamp_factoring(src);
+    printf("factors %d\n", factors);
+    if(factors != 1)
         return REDUCIBLE;
-    }
+
+    return IRREDUCIBLE;
+    
+    
+    // gf2_init(&f, 1);
+    // gf2_init(&Q, src->deg);
+    // gf2_init(&R, src->deg);
+    // gf2_init(&gcd, 1);
+    // gf2_init(&x, 1);
+    // gf2_init(&xpow, 1);
+    // gf2_init(&tmp, 1);
+
+    // gf2_copy(&f, src);
+    // gf2_set_index(&x, 1);   /* x = X */
+    
+    // printf("print f :");    gf2_print(&f);
+    // for(i=1; i<f.deg; i++)
+    // {
+    //     printf("src deg %d %d\n", f.deg, i);
+    //     /* h = gcd(f, x^{2^i} -x mod(f)) */
+    //     gf2_repeated_squaremod(&xpow, &x, i, &f);
+    //     printf("tmp square :");    gf2_print(&xpow);
+    //     gf2_addmod(&tmp, &xpow, &x, &f);    /* x mod (f) */
+    //     printf("tmp square add :");    gf2_print(&tmp);
+    //     gf2_set_zero(&xpow);
+    //     if( gf2_is_zero(&tmp) == ZERO)
+    //     {
+    //         gf2_gcd(&gcd, &f, &tmp);
+    //         printf("gcd :");    gf2_print(&gcd);
+            
+    //         //수정중
+
+    //         count++;
+    //         break;
+    //     }
+    //     gf2_gcd(&gcd, &f, &tmp);
+    //     printf("gcd :");    gf2_print(&gcd);
+    //     if( gf2_is_one(&gcd) == NOT_ONE)
+    //     {
+    //         gf2_long_division(&Q, &R, &f, &gcd);
+    //         gf2_copy(&f, &Q);
+    //         count ++;
+    //         if(count >= 2)
+    //         {
+    //             break;
+    //         }
+    //     }
+    // }
+    
+    // /* 자기 자신일 경우와 f/f로 1인경우 고려. */
+    // if( (gf2_is_one(&f) == NOT_ONE) && (f.deg != src->deg))
+    // {
+    //     count ++;
+    // }
+
+    // if(count == 1)
+    // {
+    //     printf("Irreducible\n");
+    //     return IRREDUCIBLE;
+    // }
+    // else
+    // {
+    //     printf("Reducible\n");
+    //     return REDUCIBLE;
+    // }
+    
 
 }
 /////////////////////////////////////////////////////////////////////
@@ -721,14 +731,14 @@ void gf2_generate_irreducible(gf2* src, int degree)
     {
         //gf2_random_gen_fix(&tmp);
         //z^6 + z^5 + z^4 + z^3 + z^2 + z + 1 = (z^3 + z + 1) * (z^3 + z^2 + 1) irre로 나옴
-        gf2_set_index(&tmp, 6);
-        gf2_set_index(&tmp, 5);
-        gf2_set_index(&tmp, 4);
-        gf2_set_index(&tmp, 3);
-        gf2_set_index(&tmp, 2);
-        gf2_set_index(&tmp, 1);
-        gf2_set_index(&tmp, 0);
-        gf2_fit_len(&tmp);
+        //z^6, z^6+z^2+z^0
+         gf2_set_index(&tmp, 6);
+         gf2_set_index(&tmp, 2);
+         gf2_set_index(&tmp, 0);
+        // gf2_set_index(&tmp, 3);
+        // gf2_set_index(&tmp, 1);
+        // gf2_set_index(&tmp, 0);
+        // gf2_fit_len(&tmp);
 
         res = gf2_is_irreducible(&tmp);
     }
@@ -805,25 +815,70 @@ void gf2_xgcd(gf2* gcd, gf2* x, gf2* y, gf2* a, gf2* b)
 }
 
 /*
+@   dst = difference of src
+*/
+void gf2_diff(gf2* dst, gf2* src)
+{
+    if(gf2_is_zero(src) == ZERO){
+        gf2_set_zero(dst);
+        return;
+    }
+    int i,j;
+    int rq = src->deg / 8;
+    int rr = src->deg % 8;
+
+    dst->deg = src->deg - 1;
+    for(j=rr; j>=0; j--){
+        if((j%2==1) && (((src->binary[rq] >> (j)) & 0x01) == 1)){
+            gf2_set_index(dst, 8*rq + j-1);
+        }
+    }
+
+    for(i=rq-1; i>=0; i--){
+        for(j=7; j>=0; j-=2){
+            if(((src->binary[i] >> (j)) & 0x01) == 1){
+                gf2_set_index(dst, i*8 + j-1);
+            }
+        }
+    }
+    gf2_fit_len(dst);
+
+}
+
+/*
 @     src : 입력값
 @     return : factoring 갯수. 없을 경우 1 반환
 */
-int  gf2_berlekamp_factoring(gf2* src)
+int gf2_berlekamp_factoring(gf2* src)
 {
     gf2 X;
     gf2 X_powering;
-    BMAT B;
+    BMAT B, I;
+    int rank;
     int i;
+    int k = src->deg - 1;;
 
-    bmatrix_init(&B, src->deg, src->deg );
+    //미분 먼저.
+
+    gf2_init(&X_powering, 1);
     gf2_init(&X, 1);
+    gf2_set_index(&X, 1);   //X
 
-    for(i=0; i<src->deg; ++i){  //미분값 차수까지
-        gf2_repeated_squaremod(&X_powering, &X, i, src);
-        //bmatrix_set_gf2(&B, &X_powering, i);
+    bmatrix_init(B, src->deg - 1, src->deg - 1);
+    bmatrix_init(I, src->deg - 1, src->deg - 1);
+
+    for(i=0; i<src->deg - 1; ++i){  //미분값 차수까지
+        gf2_powmod(&X_powering, &X, 2*i, src);
+        bmatrix_set_gf2(B, X_powering, i);
     }
+    bmatrix_generate_identity(I);
+    bmatrix_add_identity(B, I);
+    bmatrix_print(B);
 
-    bmatrix_free(&B);
+    rank = bmatrix_rank(B);
+    printf("rank %d\n", rank);
+    bmatrix_free(B);
+    bmatrix_free(I);
 
-    return 1;
+    return k - rank;
 }

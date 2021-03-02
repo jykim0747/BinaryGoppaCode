@@ -57,7 +57,8 @@ int gf2_is_irreducible(gf2* src);
 void gf2_generate_irreducible(gf2* src, int degree);
 
 void gf2_xgcd(gf2* gcd, gf2* x, gf2* y, gf2* a, gf2* b);
-int  gf2_berlekamp_factoring(gf2* src);
+void gf2_diff(gf2* dst, gf2* src);
+int gf2_berlekamp_factoring(gf2* src);
 
 void test_gf2_init();
 void test_gf2_math_operation();
