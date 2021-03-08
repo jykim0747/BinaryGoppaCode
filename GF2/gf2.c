@@ -633,10 +633,6 @@ void gf2_square_root(gf2* dst, gf2* a, gf2* mod)
 */
 int gf2_is_irreducible(gf2* src)
 {
-    int i;
-    gf2 f, gcd, Q, R;
-    gf2 x, xpow, tmp;
-    int count = 0;
     int factors;
 
     if(src->deg == 0)
@@ -645,75 +641,10 @@ int gf2_is_irreducible(gf2* src)
     }
 
     factors = gf2_berlekamp_factoring(src);
-    printf("factors %d\n", factors);
     if(factors != 1)
         return REDUCIBLE;
 
     return IRREDUCIBLE;
-    
-    
-    // gf2_init(&f, 1);
-    // gf2_init(&Q, src->deg);
-    // gf2_init(&R, src->deg);
-    // gf2_init(&gcd, 1);
-    // gf2_init(&x, 1);
-    // gf2_init(&xpow, 1);
-    // gf2_init(&tmp, 1);
-
-    // gf2_copy(&f, src);
-    // gf2_set_index(&x, 1);   /* x = X */
-    
-    // printf("print f :");    gf2_print(&f);
-    // for(i=1; i<f.deg; i++)
-    // {
-    //     printf("src deg %d %d\n", f.deg, i);
-    //     /* h = gcd(f, x^{2^i} -x mod(f)) */
-    //     gf2_repeated_squaremod(&xpow, &x, i, &f);
-    //     printf("tmp square :");    gf2_print(&xpow);
-    //     gf2_addmod(&tmp, &xpow, &x, &f);    /* x mod (f) */
-    //     printf("tmp square add :");    gf2_print(&tmp);
-    //     gf2_set_zero(&xpow);
-    //     if( gf2_is_zero(&tmp) == ZERO)
-    //     {
-    //         gf2_gcd(&gcd, &f, &tmp);
-    //         printf("gcd :");    gf2_print(&gcd);
-            
-    //         //수정중
-
-    //         count++;
-    //         break;
-    //     }
-    //     gf2_gcd(&gcd, &f, &tmp);
-    //     printf("gcd :");    gf2_print(&gcd);
-    //     if( gf2_is_one(&gcd) == NOT_ONE)
-    //     {
-    //         gf2_long_division(&Q, &R, &f, &gcd);
-    //         gf2_copy(&f, &Q);
-    //         count ++;
-    //         if(count >= 2)
-    //         {
-    //             break;
-    //         }
-    //     }
-    // }
-    
-    // /* 자기 자신일 경우와 f/f로 1인경우 고려. */
-    // if( (gf2_is_one(&f) == NOT_ONE) && (f.deg != src->deg))
-    // {
-    //     count ++;
-    // }
-
-    // if(count == 1)
-    // {
-    //     printf("Irreducible\n");
-    //     return IRREDUCIBLE;
-    // }
-    // else
-    // {
-    //     printf("Reducible\n");
-    //     return REDUCIBLE;
-    // }
-    
 
 }
 /////////////////////////////////////////////////////////////////////
@@ -727,14 +658,14 @@ void gf2_generate_irreducible(gf2* src, int degree)
 
     gf2_init(&tmp, degree);
     
-    //while(res != IRREDUCIBLE)
+    while(res != IRREDUCIBLE)
     {
-        //gf2_random_gen_fix(&tmp);
+        gf2_random_gen_fix(&tmp);
         //z^6 + z^5 + z^4 + z^3 + z^2 + z + 1 = (z^3 + z + 1) * (z^3 + z^2 + 1) irre로 나옴
-        //z^6, z^6+z^2+z^0
-         gf2_set_index(&tmp, 6);
-         gf2_set_index(&tmp, 2);
-         gf2_set_index(&tmp, 0);
+        // //z^6, z^6+z^2+z^0
+        //  gf2_set_index(&tmp, 6);
+        //  gf2_set_index(&tmp, 2);
+        //  gf2_set_index(&tmp, 0);
         // gf2_set_index(&tmp, 3);
         // gf2_set_index(&tmp, 1);
         // gf2_set_index(&tmp, 0);
@@ -853,12 +784,19 @@ int gf2_berlekamp_factoring(gf2* src)
 {
     gf2 X;
     gf2 X_powering;
+    gf2 prime;
+    gf2 gcd;
     BMAT B, I;
     int rank;
     int i;
-    int k = src->deg - 1;;
+    int k = src->deg - 1;
 
     //미분 먼저.
+    gf2_init(&prime, src->deg - 1);
+    gf2_diff(&prime, src);
+    gf2_gcd(&gcd, &prime, src); 
+    if(gf2_is_one(&gcd) != ONE) //exists factor
+        return REDUCIBLE;
 
     gf2_init(&X_powering, 1);
     gf2_init(&X, 1);
@@ -873,10 +811,8 @@ int gf2_berlekamp_factoring(gf2* src)
     }
     bmatrix_generate_identity(I);
     bmatrix_add_identity(B, I);
-    bmatrix_print(B);
 
     rank = bmatrix_rank(B);
-    printf("rank %d\n", rank);
     bmatrix_free(B);
     bmatrix_free(I);
 

@@ -245,7 +245,7 @@ static void test_gf2_is_irreducible_root()
 static void test_gf2_generate_irreducible()
 {
     gf2 A;
-    int m = 6;
+    int m = 119;
 
     gf2_init(&A, m);
     gf2_generate_irreducible(&A, m);
@@ -340,7 +340,7 @@ static void test_gf2_belekamp_factoring()
     gf2_set_index(&A, 2);
     gf2_set_index(&A, 1);
     gf2_set_index(&A, 0);
-    printf("A = "); gf2_print_pretty(&A);
+    printf("A = "); gf2_print(&A);
     num = gf2_berlekamp_factoring(&A);
 
     printf("%d factors\n", num);
@@ -381,13 +381,13 @@ void test_gf2_math_operation()
     
     printf("Start generate_irreducible test \n");
     test_gf2_generate_irreducible();
-
+    
     printf("Start xgcd test \n");
     test_gf2_xgcd();
-*/
+
     printf("Start difference test \n");
     test_gf2_diff();
-/*
+
     printf("Start belekamp_factoring test \n");
     test_gf2_belekamp_factoring();
     */
