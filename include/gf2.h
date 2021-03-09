@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include "error.h"
 
-#define size 250
+#define size 500
 
 /* GF2 element struct */
 typedef struct 

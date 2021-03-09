@@ -46,6 +46,10 @@ void gf2m_left_to_right_mod(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod, int e)
 void gf2m_powmod(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod, int e);
 int gf2m_generate_irreducible(gf2m* dst, gf2* mod, int t);
 
+void gf2m_diff(gf2m* dst, gf2m* src);
+int gf2m_berlekamp_factoring(gf2m* src, gf2* mod);
+int gf2m_is_irreducible(gf2m* src, gf2* mod);
+
 void test_gf2m_math_operation();
 
 #endif

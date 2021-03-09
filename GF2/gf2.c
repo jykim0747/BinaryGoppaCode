@@ -629,7 +629,7 @@ void gf2_square_root(gf2* dst, gf2* a, gf2* mod)
 /////////////////////////////////////////////////////////////////////
 /*
 @   return IRREDUCIBLE or REDUCIBLE
-@   Berlekamp algorithm 으로 수정 예정
+@   Berlekamp algorithm 사용
 */
 int gf2_is_irreducible(gf2* src)
 {

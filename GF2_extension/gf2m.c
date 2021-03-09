@@ -88,13 +88,13 @@ void gf2m_fit_len(gf2m* src)
 void gf2m_random_gen(gf2m* src, int m)
 {
     int i;
-    for(i = src->deg - 1; i >= 0 ; i--)
+    for(i = src->deg; i >= 0 ; i--)
     {
         gf2_init(&src->term[i], m);
         gf2_random_gen(&src->term[i]);
     }
-    gf2_init(&src->term[src->deg], m);
-    gf2_random_gen_fix(&src->term[src->deg]);
+    //gf2_init(&src->term[src->deg], m);
+    ///gf2_random_gen_fix(&src->term[src->deg]);
     gf2m_fit_len(src);
 
 }
@@ -118,12 +118,12 @@ void gf2m_set_one(gf2m* src)
 {
     gf2m_set_zero(src);
     gf2_set_one(&src->term[0]);
-    src->deg = 1;   /* 1의 차수는 상수항 1로 간주한다. */
+    src->deg = 0;   /* 1의 차수는 상수항 0으로 간주한다. */
 }
 /////////////////////////////////////////////////////////////////////
 int gf2m_is_one(gf2m* src)
 {
-    if((src->deg == 1) && (gf2_is_one(&src->term[0]) == ONE))
+    if((src->deg == 0) && (gf2_is_one(&src->term[0]) == ONE))
         return ONE;
     return NOT_ONE;
 }
@@ -655,7 +655,7 @@ int gf2m_generate_irreducible(gf2m* dst, gf2* mod, int t)
 
     gf2 irre;   //t차 기약 다항식
     gf2m gf2m_mod;
-    gf2m gf2m_tmp, gf2m_tmp2;
+    gf2m gf2m_tmp, gf2m_tmp2, gf2m_tmp3;
     gf2_MAT mat, ech_mat, mat_tmp;
 
     int i, j;
@@ -665,74 +665,68 @@ int gf2m_generate_irreducible(gf2m* dst, gf2* mod, int t)
     int col = t+1;
 
     gf2_init(&irre, t);
-    gf2_generate_irreducible(&irre, t - 1);
-    gf2_print_pretty(&irre);
+    gf2_generate_irreducible(&irre, t);
     
-    // gf2_matrix_init(&mat, row, col, m);
-    // gf2_matrix_init(&mat_tmp, row, col, m);
-    // gf2_matrix_init(&ech_mat, row, col, m);
+    gf2_matrix_init(&mat, row, col, m);
+    gf2_matrix_init(&mat_tmp, row, col, m);
+    gf2_matrix_init(&ech_mat, row, col, m);
 
+    printf("irre ! "); gf2_print(&irre);
     
-    // gf2m_init(&gf2m_mod, t);
-    // gf2m_init(&gf2m_tmp, t - 1);
-    // gf2m_init(&gf2m_tmp2, t - 1);
+    gf2m_init(&gf2m_mod, t);
+    gf2m_init(&gf2m_tmp, t - 1);
+    gf2m_init(&gf2m_tmp2, t - 1);
+    gf2m_init(&gf2m_tmp3, t - 1);
 
+    /* gf2 to gf2m */
+    {
+        int qq = irre.deg / 8;
+        int qr = irre.deg % 8;
+        for(j = qr; j>=0; j--)
+        {
+            if((irre.binary[qq]>>j) & 0x01)
+                gf2_set_one(&gf2m_mod.term[qq*8 + j]);
+        }
+        for(i = qq - 1; i>=0; i--)
+            for(j = 7; j>=0; j--)
+                if((irre.binary[i]>>j) & 0x01)
+                    gf2_set_one(&gf2m_mod.term[i*8 + j]);
+    }
+    gf2m_fit_len(&gf2m_mod);
 
-    // /* gf2 to gf2m */
-    // {
-    //     int qq = irre.deg / 8;
-    //     int qr = irre.deg % 8;
-    //     for(j = qr; j>=0; j--)
-    //     {
-    //         if((irre.binary[qq]>>j) & 0x01)
-    //             gf2_set_one(&gf2m_mod.term[qq*8 + j]);
-    //     }
-    //     for(i = qq - 1; i>=0; i--)
-    //         for(j = 7; j>=0; j--)
-    //             if((irre.binary[i]>>j) & 0x01)
-    //                 gf2_set_one(&gf2m_mod.term[i*8 + j]);
-    // }
-    // gf2m_fit_len(&gf2m_mod);
+    do{
+        gf2m_random_gen(&gf2m_tmp, m - 2);    //식 생성이 잘못됨
+        gf2m_print(&gf2m_tmp);
+        gf2m_set_one(&gf2m_tmp2);
+        for(i=0; i<col; i++)
+        {
+            for(j=0; j<row; j++)
+            {
+                *gf2_mat_entry(mat, j, i) = (gf2m_tmp2.term[j]);
+            }
+            gf2m_mulmod(&gf2m_tmp3, &gf2m_tmp2, &gf2m_tmp, &gf2m_mod, mod);
+            gf2m_copy(&gf2m_tmp2, &gf2m_tmp3);
+        }
+        gf2_matrix_echelon(ech_mat, mat, mod);
 
-    // do{
-    //     gf2m_random_gen(&gf2m_tmp, m);
-    //     gf2m_set_one(&gf2m_tmp2);
-    //     for(i=0; i<col; i++)
-    //     {
-    //         for(j=0; j<row; j++)
-    //         {
-    //             *gf2_mat_entry(mat, j, i) = (gf2m_tmp2.term[j]);
-    //         }
-    //         gf2m_mulmod(&gf2m_tmp2, &gf2m_tmp2, &gf2m_tmp, &gf2m_mod, mod);
-    //     }
-    //     gf2_matrix_echelon(ech_mat, mat, mod);
+        count = 0;
+        for(i=0; i<row; ++i)
+        {
+            if(gf2_is_one(gf2_mat_entry(mat, i, i)) == ONE)
+                count ++;
+        }
+    }while(count != row);
 
-    //     count = 0;
-    //     for(i=0; i<row; ++i)
-    //     {
-    //         if(gf2_is_one(gf2_mat_entry(mat, i, i)) == ONE)
-    //             count ++;
-    //     }
-
-    // }while(count != row);
-
-    // for(i=0; i<t; i++)
-    // {
-    //     gf2_copy(&dst->term[i], gf2_mat_entry(ech_mat, i, col-1));
-    // }
-    // gf2_set_one(&dst->term[t]);
-    // dst->deg = t;
-
-    // gf2_matrix_print(mat);
-    // printf("종료\n");
-    // gf2_matrix_print(ech_mat);
-    
-    // printf("기약다항식\n");
-    // gf2m_print(dst);
-    
-    // gf2_matrix_free(ech_mat);
-    // gf2_matrix_free(mat);
-    // gf2_matrix_free(mat_tmp);
+    for(i=0; i<t; i++)
+    {
+        gf2_copy(&dst->term[i], gf2_mat_entry(ech_mat, i, col-1));
+    }
+    gf2_set_one(&dst->term[t]);
+    dst->deg = t;
+        
+    gf2_matrix_free(ech_mat);
+    gf2_matrix_free(mat);
+    gf2_matrix_free(mat_tmp);
 
     return SUCCESS;
 }
@@ -804,3 +798,79 @@ void gf2m_square_root(gf2m* dst, gf2m* a, gf2m* gf2m_mod, gf2* mod)
 }
 
 
+/*
+@   gf2m 미분
+@   dst : 미분값
+@   src : 입력값
+*/
+void gf2m_diff(gf2m* dst, gf2m* src)
+{
+    int i;
+
+    for(i=1; i<src->deg; i+=2)
+        gf2_copy(&dst->term[i-1], &src->term[i]);
+
+    gf2m_fit_len(dst);
+}
+
+/*
+@     src : 입력값
+@     return : factoring 갯수. 없을 경우 1 반환
+*/
+int gf2m_berlekamp_factoring(gf2m* src, gf2* mod)
+{
+
+    gf2m X, X_pow;
+    gf2m prime;
+    gf2m gcd;
+    gf2 gf2_x;
+    gf2_MAT B, I;
+    int rank, i;
+    int m = mod->deg - 1;
+    int k = src->deg;
+
+    gf2_init(&gf2_x, 1);
+    gf2m_init(&prime, src->deg);
+    gf2m_diff(&prime, src);
+    gf2m_gcd(&gcd, &prime, src, mod);
+
+    if(gcd.deg >= 1)    // 상수(ex. z^2+z)를 1로 취급한다. (sage)
+        return REDUCIBLE;
+    
+    gf2_set_index(&gf2_x, 1);
+    gf2m_init(&X, 1);
+    gf2m_init(&X_pow, 1);
+    gf2m_set_index(&X, &gf2_x, 0);
+
+    gf2_matrix_init(B, src->deg, src->deg, m);
+    gf2_matrix_init(I, src->deg, src->deg, m);
+    
+    //진행중
+
+    return IRREDUCIBLE;
+}
+
+/*
+@ return IRREDUCIBLE or REDUCIBLE
+@ Berlekamp algorithm
+*/
+/*
+@   return IRREDUCIBLE or REDUCIBLE
+@   Berlekamp algorithm 으로 수정 예정
+*/
+int gf2m_is_irreducible(gf2m* src, gf2* mod)
+{
+    int factors;
+
+    if(src->deg == 0)
+    {
+        return REDUCIBLE;
+    }
+
+    factors = gf2m_berlekamp_factoring(src, mod);
+    if(factors != 1)
+        return REDUCIBLE;
+
+    return IRREDUCIBLE;
+
+}
