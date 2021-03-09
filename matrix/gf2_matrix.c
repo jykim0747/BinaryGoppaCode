@@ -235,3 +235,30 @@ int gf2_matrix_echelon(gf2_MAT mat_ech, gf2_MAT mat, gf2* mod)
 
     return SUCCESS;
 }
+
+void gf2_matrix_set_zero(gf2_MAT mat)
+{
+    int i, j;
+
+    for(i=0; i<mat->r; i++)
+    {
+        for(j=0; j<mat->c; j++)
+        {
+            gf2_set_zero(gf2_mat_entry(mat, i, j));
+        }
+    }
+}
+
+void gf2_matrix_generate_identity(gf2_MAT mat)
+{
+    int i;
+    
+    if(mat->r != mat->c)
+        return;
+
+    gf2_matrix_set_zero(mat);
+    for (i = 0; i < mat->r; i++)
+    {
+        gf2_set_one(gf2_mat_entry(mat, i, i));
+    }
+}

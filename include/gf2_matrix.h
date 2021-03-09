@@ -25,6 +25,8 @@ void gf2_matrix_mul_row(gf2_MAT mat, int row, gf2* src, gf2* mod);
 void gf2_matrix_copy(gf2_MAT dst, gf2_MAT src);
 void gf2_matrix_copy_row(gf2_MAT dst, gf2_MAT src, int row);
 int gf2_matrix_echelon(gf2_MAT mat_ech, gf2_MAT mat, gf2* mod);
+void gf2_matrix_set_zero(gf2_MAT mat);
+void gf2_matrix_generate_identity(gf2_MAT mat);
 
 void test_gf2_matrix_operation();
 
