@@ -3,9 +3,9 @@
 
 void test_init_matrix()
 {
-    gf2_MAT A;
-    int row = 2;
-    int col = 14;
+    gf2_MAT A, B;
+    int row = 7;
+    int col = 7;
     int m = 3;
 
     gf2_matrix_init(A, row, col, m);
@@ -14,6 +14,11 @@ void test_init_matrix()
     gf2_matrix_swap_rows(A, 0, 1);
     gf2_matrix_print(A);
     gf2_matrix_free(A);
+
+    gf2_matrix_init(B, row, col, m);
+    gf2_matrix_generate_identity(B);
+    gf2_matrix_print(B);
+    gf2_matrix_free(B);
 }
 
 void test_has_zero_matrix()
@@ -198,10 +203,10 @@ void test_generate_identity_bmatrix()
 
 void test_gf2_matrix_operation()
 {
-    //test_init_matrix();
+    test_init_matrix();
     //test_has_zero_matrix();
     //test_copy_matrix();
-    test_echelon_form_matrix();
+    //test_echelon_form_matrix();
 
 }
 
