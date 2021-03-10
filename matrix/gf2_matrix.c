@@ -188,11 +188,11 @@ int gf2_matrix_echelon(gf2_MAT mat_ech, gf2_MAT mat, gf2* mod)
     gf2 gcd, tmp, inv;
     gf2_MAT mat_tmp;
 
-    if(gf2_matrix_has_zero_rows(mat) == ZERO)
-    {
-        printf("has zero rows\n");
-        return FAILURE;
-    }
+    // if(gf2_matrix_has_zero_rows(mat) == ZERO)
+    // {
+    //     printf("has zero rows\n");
+    //     return FAILURE;
+    // }
 
     gf2_init(&inv, 1);
     gf2_init(&gcd, 1);
@@ -261,4 +261,50 @@ void gf2_matrix_generate_identity(gf2_MAT mat)
     {
         gf2_set_one(gf2_mat_entry(mat, i, i));
     }
+}
+
+void gf2_matrix_add(gf2_MAT dst, gf2_MAT src1, gf2_MAT src2)
+{
+    int i, j;
+
+    if((src1->r != src2->r) || (src1->c != src2->c))
+        return;
+    
+    for(i=0; i<src1->r; ++i)
+    {
+        for(j=0; j<src1->c; ++j)
+        {
+            gf2_add(gf2_mat_entry(dst, i, j), gf2_mat_entry(src1, i, j), gf2_mat_entry(src2, i, j));
+        }
+    }
+}
+
+void gf2_matrix_set_gf2m(gf2_MAT dst, gf2m* src, int row)
+{
+    int i;
+
+    for(i=0; i<dst->c; ++i)
+    {
+        gf2_copy(gf2_mat_entry(dst, row, i), &src->term[i]); 
+    }
+}
+
+int gf2_matrix_rank(const gf2_MAT mat, gf2* mod)
+{
+    int i;
+    int rank = 0;
+    gf2_MAT mat_ech;
+
+    gf2_matrix_init(mat_ech, mat->r, mat->c, mod->deg);
+    gf2_matrix_echelon(mat_ech, mat, mod);
+
+    for(i=0; i<mat_ech->c; ++i)
+    {
+        if(gf2_is_zero(gf2_mat_entry(mat_ech, i, i)) != ZERO)
+            rank++;
+    }
+
+    gf2_matrix_free(mat_ech);
+
+    return rank;
 }
