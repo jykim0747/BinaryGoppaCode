@@ -518,7 +518,7 @@ void gf2m_square(gf2m* dst, gf2m* src, gf2* mod)
 
     for(i=src->deg; i>=0; i--)
     {
-        if(gf2_is_zero(&src->term[i]) != 0)
+        if(gf2_is_zero(&src->term[i]) != ZERO)
         {
             gf2_squaremod(&tmp, &(src->term[i]), mod);
             gf2m_set_index(dst, &tmp, i*2);
@@ -816,10 +816,10 @@ void gf2m_diff(gf2m* dst, gf2m* src)
 /*
 @     src : 입력값
 @     return : factoring 갯수. 없을 경우 1 반환
+@     wrong function..
 */
 int gf2m_berlekamp_factoring(gf2m* src, gf2* mod)
 {
-
     gf2m X, X_pow;
     gf2m prime;
     gf2m gcd;
@@ -837,17 +837,28 @@ int gf2m_berlekamp_factoring(gf2m* src, gf2* mod)
     if(gcd.deg >= 1)    // 상수(ex. z^2+z)를 1로 취급한다. (sage)
         return REDUCIBLE;
     
-    gf2_set_index(&gf2_x, 1);
+    gf2_set_index(&gf2_x, 0);
     gf2m_init(&X, 1);
     gf2m_init(&X_pow, 1);
-    gf2m_set_index(&X, &gf2_x, 0);
+    gf2m_set_index(&X, &gf2_x, 1);
 
     gf2_matrix_init(B, src->deg, src->deg, m);
     gf2_matrix_init(I, src->deg, src->deg, m);
-    
-    //진행중
 
-    return IRREDUCIBLE;
+    for(i=0; i<src->deg; ++i)   //미분 차수 전까지..
+    {
+        gf2m_powmod(&X_pow, &X, src, mod, i*2);
+        gf2_matrix_set_gf2m(B, &X_pow, i);
+    }
+    gf2_matrix_print(B);
+    gf2_matrix_generate_identity(I);
+    gf2_matrix_add(B, B, I);
+    
+    rank = gf2_matrix_rank(B, mod);
+    gf2_matrix_free(B);
+    gf2_matrix_free(I);
+
+    return k - rank;
 }
 
 /*
@@ -873,4 +884,23 @@ int gf2m_is_irreducible(gf2m* src, gf2* mod)
 
     return IRREDUCIBLE;
 
+}
+
+/*
+@   generate irreducible polynomial extension binary field
+*/
+void gf2m_generate_irreducible2(gf2m* src, int degree, gf2* mod)
+{
+    gf2m tmp;
+    int res = 1;
+
+    gf2m_init(&tmp, degree);
+    
+    while(res != IRREDUCIBLE)
+    {
+        gf2m_random_gen(&tmp, mod->deg - 2);
+        printf("tmp "); gf2m_print(&tmp);
+        res = gf2m_is_irreducible(&tmp, mod);
+    }
+    gf2m_copy(src, &tmp);
 }
