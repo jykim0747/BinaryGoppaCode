@@ -1,7 +1,7 @@
 #ifndef _gf2_MATRIX_H_
 #define _gf2_MATRIX_H_
 
-#include "gf2.h"
+#include "gf2m.h"
 
 typedef struct
 {
@@ -27,6 +27,10 @@ void gf2_matrix_copy_row(gf2_MAT dst, gf2_MAT src, int row);
 int gf2_matrix_echelon(gf2_MAT mat_ech, gf2_MAT mat, gf2* mod);
 void gf2_matrix_set_zero(gf2_MAT mat);
 void gf2_matrix_generate_identity(gf2_MAT mat);
+
+void gf2_matrix_add(gf2_MAT dst, gf2_MAT src1, gf2_MAT src2);
+void gf2_matrix_set_gf2m(gf2_MAT dst, gf2m* src, int row);
+int gf2_matrix_rank(const gf2_MAT mat, gf2* mod);
 
 void test_gf2_matrix_operation();
 
