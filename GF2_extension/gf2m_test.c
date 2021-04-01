@@ -362,53 +362,8 @@ void test_gf2_generate_irreducible_poly()
     printf("irreducible polynomial : "); gf2m_print(&A);
 
 }
-void test_gf2m_is_irreducible()
-{
-    gf2m A;
-    gf2 mod;
-    int m = 13;
-    int t = 8; //큰 수는 행렬 연산에서 오래 걸림
-    int res;
-    
-    /* z^13+z^4+z^3+z^1+z^0, irreducible */
-    gf2_init(&mod, m);
-    gf2_set_index(&mod, 13);
-    gf2_set_index(&mod, 4);
-    gf2_set_index(&mod, 3);
-    gf2_set_index(&mod, 1);
-    gf2_set_index(&mod, 0);
 
-    gf2m_init(&A, t);
-    gf2m_random_gen(&A, m);
-    printf("A = "); gf2m_print(&A);
 
-    res = gf2m_is_irreducible(&A, &mod);
-    if(res == IRREDUCIBLE)
-        printf("is IRREDUCIBLE !\n");
-    printf("is REDUCIBLE !\n");
-
-}
-
-void test_gf2m_generate_irreducible_poly_belekamp()
-{
-    gf2m A;
-    gf2 mod;
-    int m = 13;
-    int t = 4; //큰 수는 행렬 연산에서 오래 걸림
-    int res;
-    
-    /* z^13+z^4+z^3+z^1+z^0, irreducible */
-    gf2_init(&mod, m);
-    gf2_set_index(&mod, 13);
-    gf2_set_index(&mod, 4);
-    gf2_set_index(&mod, 3);
-    gf2_set_index(&mod, 1);
-    gf2_set_index(&mod, 0);
-
-    gf2m_generate_irreducible2(&A, t, &mod);
-    printf("A = "); gf2m_print(&A);
-
-}
 
 void test_gf2m_math_operation(){
     //test_gf2m_init();
@@ -422,6 +377,4 @@ void test_gf2m_math_operation(){
     //test_gf2m_square();
     //test_gf2m_powmod();
     //test_gf2_generate_irreducible_poly();
-    //test_gf2m_is_irreducible();
-    test_gf2m_generate_irreducible_poly_belekamp();
 }
