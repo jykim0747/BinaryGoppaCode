@@ -818,3 +818,23 @@ int gf2_berlekamp_factoring(gf2* src)
 
     return k - rank;
 }
+
+/*
+@   num : number (int)
+@   gf2 : gf2 struct. binary(char)
+*/
+gf2 numtogf2(int num)
+{
+    gf2 res;
+
+    gf2_init(&res, 32);
+    
+    res.binary[0] = num & 0xff;
+    res.binary[1] = (num >> 8) & 0xff;
+    res.binary[2] = (num >> 16) & 0xff;
+    res.binary[3] = (num >> 24) & 0xff;
+
+    gf2_fit_len(&res);
+
+    return res;
+}
