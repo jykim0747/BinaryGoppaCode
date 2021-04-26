@@ -185,6 +185,30 @@ void test_gf2_to_bmat()
     bmatrix_free(A);
 }
 
+/**
+ * 세로
+ */
+void test_gf2m_to_bmat()
+{
+    BMAT A;
+    gf2m B;
+    int t = 1;
+    int m = 10;
+
+    gf2m_init(&B, t);
+    gf2m_random_gen(&B, m);
+    gf2m_fit_len(&B);
+
+    printf("A = "); gf2m_print(&B);
+
+    bmatrix_init(A, (t+1)*m, (t+1)*m);
+    gf2m_to_bmat(A, B, 1);
+    bmatrix_print(A);
+
+    bmatrix_free(A);
+}
+
+
 void test_generate_identity_bmatrix()
 {
     BMAT A;
@@ -216,6 +240,7 @@ void test_bmatrix_operation()
     //test_has_zero_bmatrix();
     //test_copy_bmatrix();
     //test_echelon_form_bmatrix();
-    //test_gf2_to_bmat();
-    test_generate_identity_bmatrix();
+    // test_gf2_to_bmat();
+    // test_generate_identity_bmatrix();
+    test_gf2m_to_bmat();
 }

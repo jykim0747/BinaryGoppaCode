@@ -15,4 +15,7 @@
 #define IRREDUCIBLE 0030
 #define REDUCIBLE   0031
 
+#define IDENTITY    0040
+#define NOT_IDENTITY 0041
+
 #endif
