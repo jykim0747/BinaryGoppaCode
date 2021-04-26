@@ -60,6 +60,7 @@ void gf2_xgcd(gf2* gcd, gf2* x, gf2* y, gf2* a, gf2* b);
 void gf2_diff(gf2* dst, gf2* src);
 int gf2_berlekamp_factoring(gf2* src);
 gf2 numtogf2(int num);
+int gf2tonum(gf2 src);
 
 void test_gf2_init();
 void test_gf2_math_operation();
