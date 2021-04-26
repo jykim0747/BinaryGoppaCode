@@ -3,6 +3,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+void swap(int* a, int* b)
+{
+    int tmp;
+
+    tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
 
 void bmatrix_init(BMAT mat, int rows, int cols)
 {
@@ -265,4 +273,81 @@ int bmatrix_rank(BMAT mat)
     bmatrix_free(tmp);
 
     return rank;
+}
+
+/*
+*   mat = [I|M]인지 확인하는 함수.
+*/
+int has_Identity_bmat(BMAT mat)
+{
+    int i,j;
+    int rq = mat->r / 8;
+    int rr = mat->r % 8;
+    int count = 0;
+
+    for(i=0; i< rq; ++i)
+    {
+        for(j=0; j<8; ++j){
+            if((b_mat_entry(mat, i*8 + j, i) >> (7-j)) & 0x01 )
+                count++;
+        }
+    }
+    
+    for(j=0; j< rr; ++j)
+    {
+        if((b_mat_entry(mat, rq*8 + j, rq) >> (7-j)) & 0x01)
+            count++;
+    }
+
+    if(count == mat->r)
+        return IDENTITY;
+
+    return NOT_IDENTITY;
+}
+
+//확인 필요
+void make_Identity_bmat(BMAT mat, int *support)
+{
+    int i,j;
+    int iq, ir;
+
+    for(i=0; i< mat->r; ++i)
+    {
+        iq = i / 8;
+        ir = i % 8;
+        if(!((b_mat_entry(mat, i*8 + iq, ir) >> (7-ir)) & 0x01) )
+        {
+            for(j=ir; j<mat->c; ++j){
+                if((b_mat_entry(mat, i*8 + iq, j) >> (7-j) & 0x01)){
+                    swap(support + i, support + j);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+/**
+ * gf2m -> bmatrix 세로로 값을 넣는 함수
+ */
+void gf2m_to_bmat(BMAT mat, gf2m src, int column)
+{
+
+    int cq = column / 8;
+    int cr = column % 8;
+    int i, j;
+    int deg = src.term[0].deg;
+    int gf2;
+
+    for (i = 0; i <= src.deg; ++i)
+    {
+        gf2 = gf2tonum(src.term[i]);
+        for (j = 0; j < deg; ++j)
+        {
+            if ((gf2 >> j) & 0x01)
+            {
+                b_mat_entry(mat, i * deg + j, cq) ^= 1 << (7 - cr);
+            }
+        }
+    }
 }

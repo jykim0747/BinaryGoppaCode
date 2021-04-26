@@ -838,3 +838,17 @@ gf2 numtogf2(int num)
 
     return res;
 }
+
+
+/*
+@   gf2 : gf2 struct. binary(char)
+@   num : number (int)
+*/
+int gf2tonum(gf2 src)
+{
+    int res;
+
+    res = src.binary[0] ^ (src.binary[1] << 8) ^ (src.binary[2] << 16) ^ (src.binary[3] << 24);
+    
+    return res;
+}
