@@ -192,8 +192,8 @@ void test_gf2m_to_bmat()
 {
     BMAT A;
     gf2m B;
-    int t = 1;
-    int m = 10;
+    int t = 3;
+    int m = 5;
 
     gf2m_init(&B, t);
     gf2m_random_gen(&B, m);
@@ -201,8 +201,8 @@ void test_gf2m_to_bmat()
 
     printf("A = "); gf2m_print(&B);
 
-    bmatrix_init(A, (t+1)*m, (t+1)*m);
-    gf2m_to_bmat(A, B, 1);
+    bmatrix_init(A, (t+1)*(m+1), 16);
+    gf2m_to_bmat(A, B, m+1, 1);
     bmatrix_print(A);
 
     bmatrix_free(A);

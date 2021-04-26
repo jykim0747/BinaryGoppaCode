@@ -38,7 +38,7 @@ int bmatrix_rank(BMAT mat);
 int has_Identity_bmat(BMAT mat);
 void make_Identity_bmat(BMAT mat, int *support);
 
-void gf2m_to_bmat(BMAT mat, gf2m src, int column);
+void gf2m_to_bmat(BMAT mat, gf2m src, int m, int column);
 
 void test_bmatrix_operation();
 

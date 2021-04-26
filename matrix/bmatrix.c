@@ -330,21 +330,22 @@ void make_Identity_bmat(BMAT mat, int *support)
 /**
  * gf2m -> bmatrix 세로로 값을 넣는 함수
  */
-void gf2m_to_bmat(BMAT mat, gf2m src, int column)
+void gf2m_to_bmat(BMAT mat, gf2m src, int m, int column)
 {
 
     int cq = column / 8;
     int cr = column % 8;
     int i, j;
-    int deg = src.term[0].deg;
+    int deg = m;
     int gf2;
 
+    printf(" t : %d, m: %d \n", src.deg, deg);
     for (i = 0; i <= src.deg; ++i)
     {
         gf2 = gf2tonum(src.term[i]);
         for (j = 0; j < deg; ++j)
         {
-            if ((gf2 >> j) & 0x01)
+            if (((gf2 >> j) & 0x01) == 0x1)
             {
                 b_mat_entry(mat, i * deg + j, cq) ^= 1 << (7 - cr);
             }
