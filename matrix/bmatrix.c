@@ -305,7 +305,6 @@ int has_Identity_bmat(BMAT mat)
     return NOT_IDENTITY;
 }
 
-//확인 필요
 void make_Identity_bmat(BMAT mat, int *support)
 {
     int i,j;
@@ -315,11 +314,11 @@ void make_Identity_bmat(BMAT mat, int *support)
     {
         iq = i / 8;
         ir = i % 8;
-        if(!((b_mat_entry(mat, i*8 + iq, ir) >> (7-ir)) & 0x01) )
+        if(!((b_mat_entry(mat, i, iq) >> (7-ir)) & 0x01) )
         {
             for(j=ir; j<mat->c; ++j){
-                if((b_mat_entry(mat, i*8 + iq, j) >> (7-j) & 0x01)){
-                    swap(support + i, support + j);
+                if((b_mat_entry(mat, i, j/8) >> (7-j%8) & 0x01)){
+                    swap(support+i, support+j);
                     break;
                 }
             }
@@ -339,7 +338,6 @@ void gf2m_to_bmat(BMAT mat, gf2m src, int m, int column)
     int deg = m;
     int gf2;
 
-    printf(" t : %d, m: %d \n", src.deg, deg);
     for (i = 0; i <= src.deg; ++i)
     {
         gf2 = gf2tonum(src.term[i]);
