@@ -2,6 +2,7 @@
 #include "error.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 void swap(int* a, int* b)
 {
@@ -349,4 +350,42 @@ void gf2m_to_bmat(BMAT mat, gf2m src, int m, int column)
             }
         }
     }
+}
+/*
+@   가로로 연접하는 함수
+@   dst : dst <- [a||b]
+@     a : 왼쪽
+@     b : 오른쪽
+*/
+int mat_concat_horizontal(BMAT dst, BMAT a, BMAT b)
+{
+    int i, j;
+    int r = a->c % 8;
+
+    if (a->r != b->r)
+        return FAILURE;
+
+    if (r == 0){
+        int rr = b->c % 8;
+        for (i = 0; i < a->r; ++i){
+            *(dst->data[i]) = *(a->data[i]);
+            for (j = 0; j < b->cnum; ++j){
+                *(dst->data[i] + a->cnum + j) = (unsigned char)*(b->data[i] + j);
+            }
+        }
+    }
+    else
+    {
+        for (i = 0; i < a->r; ++i){
+            *(dst->data[i]) = *(a->data[i]);
+            *(dst->data[i]) &= (unsigned char)~((1 << (8 - r)) - 1); //앞의 행렬에서 불필요한 부분 제거
+            *(dst->data[i]) ^= (unsigned char)*(b->data[i]) >> (r);
+            for (j = 0; j < b->cnum; ++j){
+                *(dst->data[i] + a->cnum + j) = (unsigned char)*(b->data[i] + j) << (8 - r);
+                *(dst->data[i] + a->cnum + j) ^= (unsigned char)*(b->entries + i * b->cnum + j + 1) >> r;
+            }
+        }
+    }
+
+    return SUCCESS;
 }

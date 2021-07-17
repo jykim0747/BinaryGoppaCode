@@ -225,6 +225,28 @@ void test_generate_identity_bmatrix()
     bmatrix_free(A);
 }
 
+void test_concat_horizontal()
+{
+    BMAT A, B, C;
+    int row = 3;
+    int col = 7;
+
+    bmatrix_init(A, row, col);
+    bmatrix_init(B, row, 13);
+    bmatrix_init(C, row, A->c + B->c);
+
+    generate_random_bmatrix(A); bmatrix_print(A);
+    generate_random_bmatrix(B); bmatrix_print(B);
+
+    printf("C = [A || B]");
+    mat_concat_horizontal(C, A, B);
+    bmatrix_print(C);
+
+    bmatrix_free(A);
+    bmatrix_free(B);
+    bmatrix_free(C);
+}
+
 void test_gf2_matrix_operation()
 {
     test_init_matrix();
@@ -242,5 +264,6 @@ void test_bmatrix_operation()
     //test_echelon_form_bmatrix();
     // test_gf2_to_bmat();
     // test_generate_identity_bmatrix();
-    test_gf2m_to_bmat();
+    //test_gf2m_to_bmat();
+    test_concat_horizontal();
 }
