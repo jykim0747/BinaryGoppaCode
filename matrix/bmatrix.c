@@ -389,3 +389,35 @@ int mat_concat_horizontal(BMAT dst, BMAT a, BMAT b)
 
     return SUCCESS;
 }
+
+int bmatrix_transpose(BMAT dst, BMAT src){
+
+    int res = 0;
+    int iter = 0;
+    int j = 0;
+    int k = 0;
+    int cr = src->c & 0x07;
+
+    if(src->r != dst->c) goto end;
+    if(src->c != dst->r) goto end;
+
+    for (iter = 0; iter < src->r; ++iter)
+    {
+        for (j = 0; j < src->cnum-1; ++j)
+        {
+            for (k = 0; k < 8; ++k)
+            {
+                b_mat_entry(dst, j*8 + k, iter/8) ^= (b_mat_entry(src, iter, j) << k & 0x80) >> (iter%8);
+            }
+        }
+
+        for (k = 0; k < cr; ++k)
+        {
+            b_mat_entry(dst, (src->cnum-1)*8+k, iter/8) ^= (b_mat_entry(src, iter, (src->cnum - 1)) << k & 0x80) >> (iter%8);
+        }
+    }
+
+end:
+
+    return res;
+}

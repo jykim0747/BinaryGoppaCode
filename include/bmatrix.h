@@ -40,6 +40,7 @@ void make_Identity_bmat(BMAT mat, int *support);
 
 void gf2m_to_bmat(BMAT mat, gf2m src, int m, int column);
 int mat_concat_horizontal(BMAT dst, BMAT a, BMAT b);
+int bmatrix_transpose(BMAT dst, BMAT src);
 
 void test_bmatrix_operation();
 
