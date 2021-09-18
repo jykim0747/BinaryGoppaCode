@@ -397,7 +397,7 @@ int bmatrix_transpose(BMAT dst, BMAT src){
     int j = 0;
     int k = 0;
     int cr = src->c & 0x07;
-
+ 
     if(src->r != dst->c) goto end;
     if(src->c != dst->r) goto end;
 
@@ -411,6 +411,7 @@ int bmatrix_transpose(BMAT dst, BMAT src){
             }
         }
 
+        cr = (cr == 0) ? 8 : cr;
         for (k = 0; k < cr; ++k)
         {
             b_mat_entry(dst, (src->cnum-1)*8+k, iter/8) ^= (b_mat_entry(src, iter, (src->cnum - 1)) << k & 0x80) >> (iter%8);

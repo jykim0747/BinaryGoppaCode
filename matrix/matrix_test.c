@@ -249,21 +249,24 @@ void test_concat_horizontal()
 
 void test_matrix_transpose()
 {
-    BMAT A, B;
-    int row = 19;
-    int col = 19;
+    BMAT A, B, ech;
+    int row = 12;
+    int col = 16;
 
     bmatrix_init(A, row, col);
+    bmatrix_init(ech, row, col);
     bmatrix_init(B, A->c, A->r);
 
     generate_random_bmatrix(A); bmatrix_print(A);
+    bmatrix_echelon(ech, A); bmatrix_print(ech);
 
-    bmatrix_transpose(B, A);
+    bmatrix_transpose(B, ech);
     printf("B = [A]^T \n");
     bmatrix_print(B);
 
     bmatrix_free(A);
     bmatrix_free(B);
+    bmatrix_free(ech);
 }
 
 void test_gf2_matrix_operation()
