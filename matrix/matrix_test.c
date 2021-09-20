@@ -228,11 +228,11 @@ void test_generate_identity_bmatrix()
 void test_concat_horizontal()
 {
     BMAT A, B, C;
-    int row = 3;
+    int row = 2;
     int col = 7;
 
     bmatrix_init(A, row, col);
-    bmatrix_init(B, row, 13);
+    bmatrix_init(B, row, 20);
     bmatrix_init(C, row, A->c + B->c);
 
     generate_random_bmatrix(A); bmatrix_print(A);
@@ -288,6 +288,6 @@ void test_bmatrix_operation()
     // test_gf2_to_bmat();
     // test_generate_identity_bmatrix();
     //test_gf2m_to_bmat();
-    //test_concat_horizontal();
-    test_matrix_transpose();
+    test_concat_horizontal();
+    //test_matrix_transpose();
 }
