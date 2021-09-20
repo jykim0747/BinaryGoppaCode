@@ -19,6 +19,13 @@ void Fisher_Yate(int* set, int len)
 }
 
 
+void clearParam(Param* ctx){
+    gf2_set_zero(&ctx->mod);
+    gf2m_set_zero(&ctx->Goppa);
+    if(ctx->supportSet) free(ctx->supportSet);
+    bmatrix_free(ctx->paritycheckMatrix);
+    bmatrix_free(ctx->generatorMatrix);
+}
 
 int get_paritycheck_matrix(Param* ctx)
 {
@@ -104,4 +111,53 @@ end:
     bmatrix_free(mat);
 
     return res;
+}
+
+int get_generator_matrix(Param* ctx)
+{
+    BMAT mat = {0x0,};
+    BMAT mat_ech = {0x0,};
+    BMAT mat_tmp = {0x0,};
+    BMAT mat_transpose = {0x0,};
+    BMAT mat_I = {0x0,};
+    BMAT* pm;
+    int res;
+    int i = 0;
+    int k = 0;
+    /* [k x n(=mt+k)], gmat = [gmat_tmp || gmat_I] */
+
+    k = (ctx->paritycheckMatrix->c - ctx->paritycheckMatrix->r);
+
+    pm = &ctx->paritycheckMatrix;
+    bmatrix_init(mat, k, ctx->n - k);
+    bmatrix_init(ctx->generatorMatrix, k, ctx->n);
+    bmatrix_init(mat_ech, (*pm)->r, (*pm)->c);
+    bmatrix_init(mat_transpose, (*pm)->c, (*pm)->r);
+    
+    bmatrix_echelon(mat_ech, *pm);
+    bmatrix_transpose(mat_transpose, mat_ech);
+
+    for(i = 0; i < k; ++i){
+        mat->data[i] = mat_transpose->data[mat_transpose->c + i];
+    }
+
+    bmatrix_init(mat_I, k, k);
+    bmatrix_generate_identity(mat_I);
+
+    mat_concat_horizontal(ctx->generatorMatrix, mat, mat_I);
+    
+    bmatrix_free(mat);
+    bmatrix_free(mat_tmp);
+    bmatrix_free(mat_ech);
+    bmatrix_free(mat_I);
+    bmatrix_free(mat_transpose);
+
+    return 1;
+}
+
+// G*H^T = 0
+int validate(Param* ctx)
+{
+
+
 }
