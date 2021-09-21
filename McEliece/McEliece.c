@@ -158,6 +158,17 @@ int get_generator_matrix(Param* ctx)
 // G*H^T = 0
 int validate(Param* ctx)
 {
+    BMAT z;
+    BMAT pt;
+    int k = (ctx->paritycheckMatrix->c - ctx->paritycheckMatrix->r);
+    int n = ctx->n;
 
+    bmatrix_init(pt, ctx->paritycheckMatrix->c, ctx->paritycheckMatrix->r);
+    bmatrix_transpose(pt, ctx->paritycheckMatrix);
 
+    bmatrix_init(z, k, n-k);
+    bmatrix_mul(z, ctx->generatorMatrix, pt);
+
+    bmatrix_free(pt);
+    bmatrix_free(z);
 }
