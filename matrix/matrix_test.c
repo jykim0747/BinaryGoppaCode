@@ -269,6 +269,54 @@ void test_matrix_transpose()
     bmatrix_free(ech);
 }
 
+void test_matrix_mul()
+{
+    BMAT A, B, C;
+    int row = 12;
+    int col = 16;
+    
+    bmatrix_init(A, row, col);
+    bmatrix_init(B, col, col);
+    bmatrix_init(C, row, col);
+    
+    generate_random_bmatrix(A);
+    bmatrix_print(A);
+
+    generate_random_bmatrix(B);
+    bmatrix_print(B);
+
+    bmatrix_mul(C, A, B);
+    printf("C =  A * B\n");
+    bmatrix_print(C);
+
+
+    bmatrix_free(A);
+    bmatrix_free(B);
+
+}
+
+void test_matrix_inverse()
+{
+    BMAT A, B;
+    int row = 10;
+    int col = 10;
+    
+    bmatrix_init(A, row, col);
+    bmatrix_init(B, col, col);
+    
+    bmatrix_generate_inverse(B, A);
+
+    printf("A \n");
+    bmatrix_print(A);
+
+    printf("B =  inverse of A \n");
+    bmatrix_print(B);
+
+    bmatrix_free(A);
+    bmatrix_free(B);
+
+}
+
 void test_gf2_matrix_operation()
 {
     test_init_matrix();
@@ -277,7 +325,6 @@ void test_gf2_matrix_operation()
     //test_echelon_form_matrix();
 
 }
-
 
 void test_bmatrix_operation()
 {
@@ -288,6 +335,8 @@ void test_bmatrix_operation()
     // test_gf2_to_bmat();
     // test_generate_identity_bmatrix();
     //test_gf2m_to_bmat();
-    test_concat_horizontal();
+    //test_concat_horizontal();
     //test_matrix_transpose();
+    //test_matrix_mul();
+    test_matrix_inverse();
 }

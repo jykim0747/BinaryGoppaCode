@@ -454,3 +454,77 @@ int bmatrix_mul(BMAT dst, BMAT src1, BMAT src2)
 end:
     return res;
 }
+
+/*
+* dst = inverse of src
+* SUCCESS : 역행렬 존재
+* FAILURE : 역행렬 존재하지 않음
+*/
+int bmatrix_inverse(BMAT dst, BMAT src){
+    int res = 0;
+    BMAT tmp;
+    BMAT I;
+    int i, j, k, count;
+
+    bmatrix_init(tmp, src->r, src->c);
+    bmatrix_copy(tmp, src);
+
+    if(bmatrix_has_zero_rows(tmp) == ZERO)
+    {
+        //printf("has zero rows\n");
+        res = FAILURE;
+        goto end;
+    }
+
+    bmatrix_init(I, src->r, src->c);
+    bmatrix_generate_identity(I);
+
+    for(i=0; i<src->r; ++i)
+    {
+        int iq = i / 8;
+        int ir = i % 8;
+        count = 0;
+        for(j = i; j<src->r; j++)
+        {
+            if((b_mat_entry(tmp, j, iq)>>(7-ir)) & 0x01)
+            {
+                if(count == 0){
+                    bmatrix_swap_rows(tmp, i, j);
+                    bmatrix_swap_rows(I, i, j);
+                    count = 1;
+                }
+                else{
+                    bmatrix_add_row(tmp, j, i);
+                    bmatrix_add_row(I, j, i);
+                }
+            }
+        }
+        for(k=0; k<i; k++){
+            if((b_mat_entry(tmp, k, iq)>>(7-ir)) & 0x01){
+                bmatrix_add_row(tmp, k, i);
+                bmatrix_add_row(I, k, i);
+            }
+        }
+    }
+
+    if(has_Identity_bmat(tmp) == NOT_IDENTITY)
+    {
+        res = FAILURE;
+        goto end;
+    }    
+
+    bmatrix_copy(dst, I);
+
+end:
+    bmatrix_free(tmp);
+    bmatrix_free(I);
+
+    return res;
+}
+
+void bmatrix_generate_inverse(BMAT dst, BMAT src){
+    do{
+        generate_random_bmatrix(src);
+    }
+    while(bmatrix_inverse(dst, src) == FAILURE);
+}
