@@ -426,3 +426,38 @@ end:
 
     return res;
 }
+
+int bmatrix_mul(BMAT dst, BMAT src1, BMAT src2)
+{
+    int res = 0;
+    int r = src1->c % 8;
+    int i,j,k,l;
+
+    if (src1->c != src2->r)
+    {
+        res = -2;
+        goto end;
+    }
+
+    for(i=0; i<src1->r; ++i){
+        for(j=0; j<src1->cnum-1; ++j){
+            for(k=0; k<8; ++k){
+                if(((b_mat_entry(src1, i, j)>>(7-k)) & 0x01) == 1){
+                for(l=src2->cnum-1; l>=0; l--){
+                    b_mat_entry(dst, i, l) ^= b_mat_entry(src2, j*8 + k, l);
+                }
+                }
+            }
+        }
+        for(k=0; k<r; ++k){
+            if(((b_mat_entry(src1, i, src2->cnum-1)>>(7-k)) & 0x01) == 1){
+            for(l=src2->cnum-1; l>=0; l--){
+                    b_mat_entry(dst, i, l) ^= b_mat_entry(src2, (src1->cnum-1)*8 + k, l);
+                }
+            }
+        }
+    }
+
+end:
+    return res;
+}
