@@ -1,5 +1,7 @@
 #include "McEliece.h"
 
+static void generateP(BMAT src, int num);
+
 /*
 @   len 길이를 가지는 set의 원소를 섞는 함수
 @   set : 섞이는 집합. 갱신
@@ -25,6 +27,10 @@ void clearParam(Param* ctx){
     if(ctx->supportSet) free(ctx->supportSet);
     bmatrix_free(ctx->paritycheckMatrix);
     bmatrix_free(ctx->generatorMatrix);
+
+    bmatrix_free(ctx->key.P);
+    bmatrix_free(ctx->key.S);
+    bmatrix_free(ctx->key.SGP);
 }
 
 int get_paritycheck_matrix(Param* ctx)
@@ -124,6 +130,7 @@ int get_generator_matrix(Param* ctx)
     int res;
     int i = 0;
     int k = 0;
+
     /* [k x n(=mt+k)], gmat = [gmat_tmp || gmat_I] */
 
     k = (ctx->paritycheckMatrix->c - ctx->paritycheckMatrix->r);
@@ -152,7 +159,7 @@ int get_generator_matrix(Param* ctx)
     bmatrix_free(mat_I);
     bmatrix_free(mat_transpose);
 
-    return 1;
+    return 0;
 }
 
 // G*H^T = 0
@@ -171,4 +178,74 @@ int validate(Param* ctx)
 
     bmatrix_free(pt);
     bmatrix_free(z);
+
+    return 0;
+}
+
+int get_generate_key(Param* ctx){
+    int res = 0;
+
+    int k = ctx->generatorMatrix->r;
+    int n = ctx->generatorMatrix->c;
+    BMAT sInv;
+    BMAT tmp;
+
+    /*
+        Generation of (k x k) random invertible matrix S
+    */
+    bmatrix_init(ctx->key.S, k, k);
+    bmatrix_init(sInv, k, k);
+
+    bmatrix_generate_inverse(sInv, ctx->key.S);
+#ifdef DEBUG
+    bmatrix_generate_identity(ctx->key.S);
+#endif
+    printf("S\n"); bmatrix_print(ctx->key.S);
+    /*
+        Generation of (n x n) random permutation matrix P
+    */
+    bmatrix_init(ctx->key.P, n, n);
+    generateP(ctx->key.P, n);
+#ifdef DEBUG
+    bmatrix_generate_identity(ctx->key.P);
+#endif
+    printf("P\n"); bmatrix_print(ctx->key.P);
+
+    /*
+        Generation of G' = SGP
+    */
+    bmatrix_init(ctx->key.SGP, k, n);
+    bmatrix_init(tmp, k, n);
+
+    bmatrix_mul(tmp, ctx->key.S, ctx->generatorMatrix);
+    bmatrix_mul(ctx->key.SGP, tmp, ctx->key.P);
+    printf("SGP\n"); bmatrix_print(ctx->key.SGP);
+
+    bmatrix_free(tmp);
+    bmatrix_free(sInv);
+    return res;
+}
+
+static void generateP(BMAT src, int num){
+
+    int* set = NULL;
+    int i = 0;
+    int pq, pr;
+    
+    set = (int*)malloc(sizeof(int) * num);
+    
+    for(i=0; i<num; ++i){
+        *(set + i) = i;
+    }
+
+    Fisher_Yate(set, num);
+
+    for (i = 0; i < num; ++i)
+    {
+        pq = (*(set + i)) / (sizeof(unsigned char) * 8);
+        pr = (*(set + i)) % (sizeof(unsigned char) * 8);
+        b_mat_entry(src, i, pq) ^= (1 << pr);
+    }
+
+    if(set) free(set);
 }

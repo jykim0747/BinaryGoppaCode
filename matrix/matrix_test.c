@@ -272,11 +272,11 @@ void test_matrix_transpose()
 void test_matrix_mul()
 {
     BMAT A, B, C;
-    int row = 12;
+    int row = 4;
     int col = 16;
     
-    bmatrix_init(A, row, col);
-    bmatrix_init(B, col, col);
+    bmatrix_init(A, row, row);
+    bmatrix_init(B, row, col);
     bmatrix_init(C, row, col);
     
     generate_random_bmatrix(A);
@@ -337,6 +337,6 @@ void test_bmatrix_operation()
     //test_gf2m_to_bmat();
     //test_concat_horizontal();
     //test_matrix_transpose();
-    //test_matrix_mul();
-    test_matrix_inverse();
+    test_matrix_mul();
+    //test_matrix_inverse();
 }
