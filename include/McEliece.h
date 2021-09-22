@@ -37,6 +37,9 @@ void encryption(BMAT dst, BMAT src, Param* ctx);
 int patterson_decoding(BMAT dst, BMAT src, Param* ctx);
 int EEA_patterson(gf2m* x, gf2m* y, gf2m* a, gf2m* b, gf2m* mod);
 
+gf2 horner_method(gf2m* poly, gf2* src, gf2* mod);
+int find_root(gf2* root_set, gf2m* poly, int* support, int n, gf2* mod);
+
 void test_mceliece_operation();
 
 #endif

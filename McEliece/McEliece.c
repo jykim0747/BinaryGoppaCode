@@ -505,3 +505,71 @@ int EEA_patterson(gf2m* x, gf2m* y, gf2m* a, gf2m* b, gf2m* mod)
 
     return SUCCESS;
 }
+
+/*
+@   horner's 방법. 계산한 값을 반환함.
+@   poly : fqt 다항식
+@   src : fq 다항식. poly에 입력 하는 값
+@   mod : mod(fq)
+@   return add_tmp : 결과값
+*/
+gf2 horner_method(gf2m* poly, gf2* src, gf2* mod)
+{
+    //f(x) = a_0 + a_1x^1 + a_2x^2 + ... + a_nx^n
+    //f(x) = a_0 + (a_nx + a_(n-1))x + ...)x
+    // x <- src
+    int i = poly->deg;
+    gf2 mul_tmp, add_tmp;
+
+    gf2_init(&mul_tmp, mod->deg);
+    gf2_init(&add_tmp, mod->deg);
+
+    //printf("입력\n");
+    //gf2_print(src);
+
+    gf2_mulmod(&mul_tmp, &(poly->term[poly->deg]), src, mod);
+    while(i--)
+    {
+        gf2_add(&add_tmp, &mul_tmp, &(poly->term[i]));
+        //printf("덧셈\n");
+        //gf2_print(&add_tmp);
+        gf2_mulmod(&mul_tmp, &add_tmp, src, mod);
+        //printf("곱셈\n");
+        //gf2_print(&mul_tmp);
+    }
+    //printf("결과\n");
+    //fq_print(&add_tmp);
+
+    //fq_clear(&add_tmp);
+    
+    return add_tmp;
+}
+
+int find_root(gf2* root_set, gf2m* poly, int* support, int n, gf2* mod)
+{
+    int i, roots = 0;
+    gf2 fq_spt, val;
+
+    for(i=0; i<n; i++)
+    {
+        gf2_init(&fq_spt, 32);
+        fq_spt.binary[0] =  support[i]        & 0xff;   //다항식 변환
+        fq_spt.binary[1] = (support[i] >>  8) & 0xff;
+        fq_spt.binary[2] = (support[i] >> 16) & 0xff;
+        fq_spt.binary[3] = (support[i] >> 24) & 0xff;
+
+        gf2_fit_len(&fq_spt);
+
+        val = horner_method(poly, &fq_spt, mod);    //계산값이 0인지 확인하여 해를 결정함.
+        if(gf2_is_zero(&val) == ZERO)
+        {
+            gf2_copy(&(root_set[roots]), &fq_spt);
+            roots++;
+        }
+        gf2_set_zero(&val);
+    }
+
+    return roots;
+
+}
+
