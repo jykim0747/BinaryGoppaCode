@@ -256,10 +256,252 @@ static void generateP(BMAT src, int num){
 
     for (i = 0; i < num; ++i)
     {
-        pq = (*(set + i)) / (sizeof(unsigned char) * 8);
-        pr = (*(set + i)) % (sizeof(unsigned char) * 8);
+        pq = *(set + i) / 8;
+        pr = *(set + i) % 8;
         b_mat_entry(src, i, pq) ^= (1 << pr);
     }
 
     if(set) free(set);
+}
+
+/*
+@   오류 생성 함수
+@   error : 오류 벡터
+@     num : 오류 개수
+*/
+void generateError(BMAT error, int num)
+{
+    int* error_index = NULL;
+    int i;
+    int q, r;
+
+    error_index = (int*)malloc(sizeof(int) * error->c);
+
+    for(i=0; i<error->c; i++)
+        *(error_index+i) = i;
+
+    Fisher_Yate(error_index, error->c);
+
+    for(i=0; i<num; i++)
+    {   
+        q = *(error_index+i)/8;
+        r = *(error_index+i)%8;
+        b_mat_entry(error, 0, q) ^= (1 << r);
+    }
+
+    if(error_index) free(error_index);
+
+}
+
+/*
+@   McEliece Encryption
+@   dst : ciphertext
+@   src : plaintext
+@   ctx : context
+*/
+void encryption(BMAT dst, BMAT src, Param* ctx)
+{
+    BMAT errCode;
+
+    bmatrix_init(errCode, 1, ctx->key.SGP->c);
+    generateError(errCode, ctx->t);
+    
+    /*
+        Generation of a codeword.
+    */
+    bmatrix_init(dst, 1, ctx->key.SGP->c);
+    bmatrix_mul(dst, src, ctx->key.SGP);
+
+    /*
+        Codeword + Error vector
+    */
+    printf("Ciphertext = codeword + error\n");
+    //mat_add(dst, dst, errCode); //구현 필요
+
+    bmatrix_free(errCode);
+}
+
+/*
+@   patterson decoding 알고리듬
+@   src : 수신된 벡터
+@   pmat : paritycheck matrix
+@   support : support set
+@   Goppa_poly : Goppa 다항식
+@   mod : mod(fq)
+*/
+int patterson_decoding(BMAT dst, BMAT src, Param* ctx)
+{
+    int res = 0;
+    int i;
+    BMAT received_vec_tp;
+    BMAT syndrome;
+    
+    gf2m synPoly;
+    gf2m gcd, inv, tmp;
+    gf2m X, synPolyInv;
+    gf2m polyTmp;
+    gf2m Ax, Bx, Dx;
+    gf2m sigma, Ax2, Bx2;
+    gf2 rootSet;
+
+    /***********************************************
+     * Step 1. Compute the syndrome: Hy^T
+    ***********************************************/    
+
+    bmatrix_init(received_vec_tp, src->c, src->r);
+    bmatrix_init(syndrome, ctx->paritycheckMatrix->r, 1);
+    
+    bmatrix_mul(syndrome, ctx->paritycheckMatrix, received_vec_tp);
+    bmatrix_free(received_vec_tp);
+
+    //mat is zero 구현 필요
+    /*
+    if( mat_is_zero(syndrome) == ZERO ) //if syndrome is zero. -> return No-Error.
+    {
+        printf("No errors\n");
+        res = SUCCESS;
+        goto end;
+    }
+    */
+
+    printf("syndrome \n");
+    bmatrix_print(syndrome);
+
+    gf2m_init(&synPoly, ctx->t);
+    for(i = 0; i < syndrome->r; i++)
+    {
+        if(b_mat_entry(syndrome, i, 0) == 1)
+        {
+            synPoly.term[i/ctx->m].binary[0] ^= (1<<(i%ctx->m)); // 0 맞을까?
+        }
+    }
+    printf("syndrome poly\n");
+    gf2m_print(&synPoly);
+    //matrix to polynomial
+
+    /***********************************************
+     * Step 2. Compute the inverse of syndrome
+    ***********************************************/
+    gf2m_init(&inv, 1);
+    gf2m_init(&tmp, 1);
+    gf2m_init(&gcd, 1);
+
+    gf2m_xgcd(&gcd, &synPoly, &ctx->Goppa, &inv, &tmp, &ctx->mod);
+
+    /***********************************************
+     * Step 3. Get S(X)^-1 + X
+    ***********************************************/
+
+    gf2m_init(&X, 1);
+    gf2_set_one(&X.term[1]);
+    gf2m_add(&synPolyInv, &inv, &X);
+
+    /***********************************************
+     * Step 4. Get the square root T(X) of S(X)^-1 + X
+    ***********************************************/
+
+    gf2m_init(&polyTmp, ctx->t);
+    gf2m_square_root(&polyTmp, &synPolyInv, &ctx->Goppa, & ctx->mod);
+
+    /***********************************************
+     * Step 5. Solve the key equation
+     *  sigam(X) = a^2(X) + b^2(X)*X
+     *  We use EEA
+     *  b(X) * d(X) == a(X) mod g(X), where d(X) = sqrt(S(X)^-1 + X)
+    ***********************************************/
+
+    gf2m_init(&Ax, ctx->t/2);
+    gf2m_init(&Bx, ctx->t/2);
+
+    EEA_patterson(&polyTmp, &ctx->Goppa, &Ax, &Bx, &ctx->mod);
+
+    /***********************************************
+     * Step 6. Compute sigma poly. (error locator poly.)
+     * sigma(X) = a(X)^2 + b(X)^2 * X
+    ***********************************************/
+
+    gf2m_init(&Ax2, 2*Ax.deg);
+    gf2m_init(&Bx2, 2*Bx.deg);
+    gf2m_init(&sigma, ctx->t);
+
+    gf2m_square(&Ax2, &Ax, &ctx->mod);
+    gf2m_square(&Bx2, &Bx, &ctx->mod);
+    gf2m_mul(&Bx2, &Bx2, &X, &ctx->mod);
+    gf2m_add(&sigma, &Ax2, &Bx2);
+
+    /***********************************************
+     * Step 7. Find all roots of sigma(X)
+    ***********************************************/
+
+   gf2_init(&rootSet, ctx->t);
+
+end:
+
+    return res;
+}
+
+
+/*
+@   B*X == A mod Y
+*/
+int EEA_patterson(gf2m* x, gf2m* y, gf2m* a, gf2m* b, gf2m* mod)
+{
+    int t = y->deg;
+    gf2m t0, t1, t2;
+    gf2m v0, v1, v2;
+    gf2m u0, u1, u2;
+    gf2m R , Q;
+    gf2m tmp;
+
+    int len = (x->deg <= y->deg) ? 2 * x->deg : 2 * y->deg;
+
+    gf2m_init(&t0, len); gf2m_init(&t1, len); gf2m_init(&t2, len);
+    gf2m_init(&v0, len); gf2m_init(&v1, len); gf2m_init(&v2, len);
+    gf2m_init(&u0, len); gf2m_init(&u1, len); gf2m_init(&u2, len);
+    gf2m_init(&tmp, len);
+
+    gf2m_init(&R, t);
+    gf2m_init(&Q, t);
+
+    gf2m_copy(&t0, x);         //t0 = x
+    gf2m_copy(&t1, y);         //t1 = y
+
+    gf2m_set_one(&u0);         //u0 = 1
+    gf2m_set_zero(&u1);        //u1 = 0
+
+    gf2m_set_one(&v1);         //v1 = 1
+    gf2m_set_zero(&v0);        //v0 = 0
+
+    while(t0.deg > (t/2))
+    {
+        gf2m_copy(&t2, &t0);              //t2 = t0
+        gf2m_copy(&t0, &t1);              //t0 = t1
+
+        gf2m_long_division(&Q, &R, &t2, &t1, mod);  // R = t2%t1
+        gf2m_copy(&t1, &R);               //t1 = R
+
+        gf2m_add(&tmp, &t2, &t1);         //t2 = t2 - t1
+        gf2m_long_division(&Q, &R, &tmp, &t0, mod); // Q = t2/t0
+
+        gf2m_copy(&u2, &u0);              //u2 = u0
+        gf2m_copy(&v2, &v0);              //v2 = v0
+        gf2m_copy(&u0, &u1);              //u0 = u1
+        gf2m_copy(&v0, &v1);              //v0 = v1
+
+        gf2m_mul(&tmp, &Q, &u1, mod);     //u1 = u2 - qu1
+        gf2m_add(&u1, &u2, &tmp);
+        gf2m_mul(&tmp, &Q, &v1, mod);     //v1 = v2 - qv1
+        gf2m_add(&v1, &v2 ,&tmp);
+        gf2m_set_zero(&Q);
+        gf2m_set_zero(&tmp);
+        
+    }
+
+    gf2m_fit_len(&u0);
+    gf2m_fit_len(&v0);
+    
+    gf2m_copy(a, &t0);
+    gf2m_copy(b, &u0);
+
+    return SUCCESS;
 }

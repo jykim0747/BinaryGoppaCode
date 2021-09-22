@@ -31,6 +31,11 @@ int get_paritycheck_matrix(Param* ctx);
 int get_generator_matrix(Param* ctx);
 int validate(Param* ctx);
 int get_generate_key(Param* ctx);
+void generateError(BMAT error, int num);
+
+void encryption(BMAT dst, BMAT src, Param* ctx);
+int patterson_decoding(BMAT dst, BMAT src, Param* ctx);
+int EEA_patterson(gf2m* x, gf2m* y, gf2m* a, gf2m* b, gf2m* mod);
 
 void test_mceliece_operation();
 
