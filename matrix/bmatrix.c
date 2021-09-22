@@ -438,7 +438,7 @@ int bmatrix_mul(BMAT dst, BMAT src1, BMAT src2)
         res = -2;
         goto end;
     }
-    printf("r, src1 cnum: %d, %d\n", r, src1->cnum);
+
     for(i=0; i<src1->r; ++i){
         for(j=0; j<src1->cnum-1; ++j){
             for(k=0; k<8; ++k){

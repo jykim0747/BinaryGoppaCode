@@ -26,6 +26,7 @@ typedef struct
 
 void Fisher_Yate(int* set, int len);
 void clearParam(Param* ctx);
+int generateSupportSet(Param* ctx);
 int get_paritycheck_matrix(Param* ctx);
 int get_generator_matrix(Param* ctx);
 int validate(Param* ctx);

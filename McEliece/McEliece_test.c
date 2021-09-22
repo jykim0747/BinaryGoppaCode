@@ -26,12 +26,7 @@ static void test_generate_paritiycheckmatrix()
     gf2m_generate_irreducible(&ctx.Goppa, &ctx.mod, ctx.t);
     printf(" irreducible poly  = ");    gf2m_print(&ctx.Goppa);
 
-    ctx.supportSet = (int*)malloc(sizeof(int) * (1<<ctx.m));
-    for(i=0; i<(1<<ctx.m); ++i)
-    {
-        ctx.supportSet[i] = i;
-    }
-    Fisher_Yate(ctx.supportSet, 1<<ctx.m);
+    generateSupportSet(&ctx);
     
     while(get_paritycheck_matrix(&ctx) == FAILURE);
     
@@ -62,12 +57,7 @@ static void test_generate_generatormatrix()
     gf2m_generate_irreducible(&ctx.Goppa, &ctx.mod, ctx.t);
     printf(" irreducible poly  = ");    gf2m_print(&ctx.Goppa);
 
-    ctx.supportSet = (int*)malloc(sizeof(int) * (1<<ctx.m));
-    for(i=0; i<(1<<ctx.m); ++i)
-    {
-        ctx.supportSet[i] = i;
-    }
-    Fisher_Yate(ctx.supportSet, 1<<ctx.m);
+    generateSupportSet(&ctx);
     
     while(get_paritycheck_matrix(&ctx) == FAILURE);
     
@@ -103,13 +93,8 @@ static void test_generate_key()
     gf2m_generate_irreducible(&ctx.Goppa, &ctx.mod, ctx.t);
     printf(" irreducible poly  = ");    gf2m_print(&ctx.Goppa);
 
-    ctx.supportSet = (int*)malloc(sizeof(int) * (1<<ctx.m));
-    for(i=0; i<(1<<ctx.m); ++i)
-    {
-        ctx.supportSet[i] = i;
-    }
-    Fisher_Yate(ctx.supportSet, 1<<ctx.m);
-    
+    generateSupportSet(&ctx);
+
     while(get_paritycheck_matrix(&ctx) == FAILURE);
     
     printf(" paritycheck matrix \n");   bmatrix_print(ctx.paritycheckMatrix);

@@ -33,6 +33,20 @@ void clearParam(Param* ctx){
     bmatrix_free(ctx->key.SGP);
 }
 
+int generateSupportSet(Param* ctx){
+    int i = 0;
+    int m = ctx->m;
+
+    ctx->supportSet = (int*)malloc(sizeof(int) * (1<<m));
+    for(i = 0; i < (1<<m); ++i)
+    {
+        ctx->supportSet[i] = i;
+    }
+    Fisher_Yate(ctx->supportSet, 1<<m);
+
+    return 0;
+}
+
 int get_paritycheck_matrix(Param* ctx)
 {
     int i, ir, iq;
