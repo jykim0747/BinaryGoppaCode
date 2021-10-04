@@ -535,3 +535,27 @@ void bmatrix_generate_inverse(BMAT dst, BMAT src){
     }
     while(bmatrix_inverse(dst, src) == FAILURE);
 }
+
+int bmatrix_add(BMAT dst, BMAT src1, BMAT src2)
+{
+    int res = 0;
+    int i, j;
+
+    if(src1->c != src2->c){
+        res = -2;   //추가 예정
+        goto end;
+    }
+    
+    if(src1->r != src2->r){
+        res = -2;
+        goto end;
+    }
+
+    for(i = 0; i<src1->r; ++i){
+        for(j=0; j<src1->c; ++j){
+            b_mat_entry(dst, i, j) = b_mat_entry(src1, i, j) ^ b_mat_entry(src2, i, j);
+        }
+    }
+end:
+    return res;
+}
