@@ -109,7 +109,54 @@ static void test_generate_key()
 
 static void test_patterson_decoding()
 {
+    int i;
+    int res = 0;
+    BMAT message;
+    BMAT enc;
+    Param ctx;
 
+    memset(&ctx, 0x00, sizeof(Param));
+
+    //2^m >= n && n > mt
+    ctx.n = 16;
+    ctx.t = 3;
+    ctx.m = 4;
+
+    gf2_init(&ctx.mod, ctx.m);
+    gf2_generate_irreducible(&ctx.mod, ctx.m);
+    gf2_fit_len(&ctx.mod);
+    gf2_print(&ctx.mod);
+
+    gf2m_init(&ctx.Goppa, ctx.t);
+    gf2m_generate_irreducible(&ctx.Goppa, &ctx.mod, ctx.t);
+    printf(" irreducible poly  = ");    gf2m_print(&ctx.Goppa);
+
+    generateSupportSet(&ctx);
+    
+    while(get_paritycheck_matrix(&ctx) == FAILURE);
+    
+    printf(" paritycheck matrix \n");   bmatrix_print(ctx.paritycheckMatrix);
+
+    get_generator_matrix(&ctx);
+    printf(" generator matrix \n");     bmatrix_print(ctx.generatorMatrix);
+
+
+    bmatrix_init(message, 1, ctx.n - ctx.m * ctx.t);
+    generate_random_bmatrix(message);
+
+    printf("message \n");
+    bmatrix_print(message);
+
+    printf("key generation \n");
+    get_generate_key(&ctx);
+
+    printf("encryption \n");
+    encryption(enc, message, &ctx);
+
+    printf("decryption \n");
+    //추가 예정
+
+    clearParam(&ctx);
 
 }
 
@@ -126,8 +173,10 @@ void test_find_root()
     gf2m A;
     gf2 test;
     gf2 mod;
-    int* support = NULL;
+    //int* support = NULL;
     int i;
+    Param ctx;
+    
 
     //2^m >= n && n > mt
     
@@ -135,6 +184,8 @@ void test_find_root()
     int m = 13;
     int n = 1<<m;
     
+    memset(&ctx, 0x00, sizeof(Param));
+
     gf2_init(&mod, 13);
     gf2_set_index(&mod, 13);
     gf2_set_index(&mod, 4);
@@ -247,15 +298,17 @@ void test_find_root()
     printf("A(X)\n");
     gf2m_print(&A);
 
-    support = (int *)malloc(sizeof(int) * n);
+    ctx.supportSet = (int *)malloc(sizeof(int) * n);
     for (i = 0; i < n; i++)
     {
-        *(support + i) = i;
+        *(ctx.supportSet + i) = i;
     }
+    ctx.n = n;
+    ctx.mod = mod;
 
     gf2 *tmp = NULL;
     tmp = (gf2*)calloc(n, sizeof(gf2));
-    int sol_num = find_root(tmp, &A, support, n, &mod);
+    int sol_num = find_root(tmp, &A, &ctx);
 
     i = 0;
     printf("root_set %d개\n", sol_num);
@@ -264,7 +317,7 @@ void test_find_root()
         gf2_print(&tmp[sol_num]);
     }
 
-    if (support) free(support);
+    if (ctx.supportSet) free(ctx.supportSet);
     if (tmp) free(tmp);
 }
 
@@ -273,6 +326,6 @@ void test_mceliece_operation(){
     //test_generate_paritiycheckmatrix();
     //test_generate_generatormatrix();
     //test_generate_key();
-    //test_patterson_decoding();
-    test_find_root();
+    test_patterson_decoding();
+    //test_find_root();
 }

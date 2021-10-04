@@ -201,6 +201,7 @@ int get_generate_key(Param* ctx){
 
     int k = ctx->generatorMatrix->r;
     int n = ctx->generatorMatrix->c;
+
     BMAT sInv;
     BMAT tmp;
 
@@ -312,13 +313,29 @@ void encryption(BMAT dst, BMAT src, Param* ctx)
     bmatrix_init(dst, 1, ctx->key.SGP->c);
     bmatrix_mul(dst, src, ctx->key.SGP);
 
+    printf("codeword\n");
+    bmatrix_print(dst);
+
     /*
         Codeword + Error vector
     */
     printf("Ciphertext = codeword + error\n");
-    //mat_add(dst, dst, errCode); //구현 필요
+    bmatrix_add(dst, dst, errCode);
+    bmatrix_print(dst);
 
     bmatrix_free(errCode);
+}
+
+/*
+@   McEliece Decryption
+@   dst : plaintext
+@   src : ciphertext
+@   ctx : context
+*/
+void decryption(BMAT dst, BMAT src, Param* ctx)
+{
+    //patterson decoding 검증 필요
+    //k bit slice 필요
 }
 
 /*
@@ -332,7 +349,7 @@ void encryption(BMAT dst, BMAT src, Param* ctx)
 int patterson_decoding(BMAT dst, BMAT src, Param* ctx)
 {
     int res = 0;
-    int i;
+    int i, j, jr, jq;
     BMAT received_vec_tp;
     BMAT syndrome;
     
@@ -342,7 +359,11 @@ int patterson_decoding(BMAT dst, BMAT src, Param* ctx)
     gf2m polyTmp;
     gf2m Ax, Bx, Dx;
     gf2m sigma, Ax2, Bx2;
-    gf2 rootSet;
+    gf2* rootSet;
+
+    int solNum = 0;
+    BMAT err_vec;
+
 
     /***********************************************
      * Step 1. Compute the syndrome: Hy^T
@@ -433,9 +454,46 @@ int patterson_decoding(BMAT dst, BMAT src, Param* ctx)
      * Step 7. Find all roots of sigma(X)
     ***********************************************/
 
-   gf2_init(&rootSet, ctx->t);
+    gf2_init(&rootSet, ctx->t);
+
+    solNum = find_root(&rootSet, &sigma, ctx);
+
+    printf("root of sigma %d개 \n", solNum);
+    i = solNum;
+    while(i--)
+    {
+        gf2_print(&rootSet[i]);
+    }
+
+    /***********************************************
+     * Step 8. Find error location
+    ***********************************************/
+    bmatrix_init(err_vec, 1, src->c);
+
+    for(i = 0; i<solNum; ++i){
+        int zeros = 0;
+        zeros ^=  rootSet[i].binary[0];   //다항식 변환
+        zeros ^= rootSet[i].binary[1] <<  8;
+        zeros ^= rootSet[i].binary[2] << 16;
+        zeros ^= rootSet[i].binary[3] << 24;
+        for(j=0; j<ctx->n; ++j){
+            if(zeros == *(ctx->supportSet+j)){
+                jq = j/8;
+                jr = j%8;
+                b_mat_entry(err_vec, 0, jq) ^= jr;;
+                break;
+            }
+        }
+    }
+
+    bmatrix_add(src, src, err_vec);
+    bmatrix_copy(dst, src);
+
 
 end:
+
+    bmatrix_free(err_vec);
+    if(rootSet) free(rootSet);
 
     return res;
 }
@@ -507,11 +565,11 @@ int EEA_patterson(gf2m* x, gf2m* y, gf2m* a, gf2m* b, gf2m* mod)
 }
 
 /*
-@   horner's 방법. 계산한 값을 반환함.
-@   poly : fqt 다항식
-@   src : fq 다항식. poly에 입력 하는 값
+@   horner's method. 계산한 값을 반환함.
+@   poly : gf2m 다항식
+@   src : gf2 다항식. poly에 입력 하는 값
 @   mod : mod(fq)
-@   return add_tmp : 결과값
+@   return add_tmp : gf2 결과값
 */
 gf2 horner_method(gf2m* poly, gf2* src, gf2* mod)
 {
@@ -519,36 +577,29 @@ gf2 horner_method(gf2m* poly, gf2* src, gf2* mod)
     //f(x) = a_0 + (a_nx + a_(n-1))x + ...)x
     // x <- src
     int i = poly->deg;
-    gf2 mul_tmp, add_tmp;
+    gf2 mul_tmp, add;
 
     gf2_init(&mul_tmp, mod->deg);
-    gf2_init(&add_tmp, mod->deg);
-
-    //printf("입력\n");
-    //gf2_print(src);
+    gf2_init(&add, mod->deg);
 
     gf2_mulmod(&mul_tmp, &(poly->term[poly->deg]), src, mod);
     while(i--)
     {
-        gf2_add(&add_tmp, &mul_tmp, &(poly->term[i]));
-        //printf("덧셈\n");
-        //gf2_print(&add_tmp);
-        gf2_mulmod(&mul_tmp, &add_tmp, src, mod);
-        //printf("곱셈\n");
-        //gf2_print(&mul_tmp);
+        gf2_add(&add, &mul_tmp, &(poly->term[i]));
+        gf2_mulmod(&mul_tmp, &add, src, mod);
     }
-    //printf("결과\n");
-    //fq_print(&add_tmp);
-
-    //fq_clear(&add_tmp);
     
-    return add_tmp;
+    return add;
 }
 
-int find_root(gf2* root_set, gf2m* poly, int* support, int n, gf2* mod)
+int find_root(gf2* root_set, gf2m* poly, Param* ctx)
 {
     int i, roots = 0;
     gf2 fq_spt, val;
+
+    int n = ctx->n;
+    int* support = ctx->supportSet;
+    gf2* mod = &ctx->mod;
 
     for(i=0; i<n; i++)
     {
