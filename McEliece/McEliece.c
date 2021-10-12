@@ -334,8 +334,37 @@ void encryption(BMAT dst, BMAT src, Param* ctx)
 */
 void decryption(BMAT dst, BMAT src, Param* ctx)
 {
-    //patterson decoding 검증 필요
-    //k bit slice 필요
+    BMAT sInv, pInv;
+    BMAT tmp, tmp2;
+    BMAT decoded_vec;
+    int m = ctx->m;
+    int t = ctx->t;
+    int n = ctx->n;
+    int k = n - m*t;
+
+    bmatrix_init(sInv, ctx->key.S->r, ctx->key.S->c);
+    bmatrix_init(pInv, ctx->key.P->r, ctx->key.P->c);
+
+    bmatrix_generate_inverse(pInv, ctx->key.P);
+    
+    printf("Inverse of P\n");
+    bmatrix_init(tmp, src->r, pInv->c);
+    bmatrix_mul(tmp, src, pInv);
+
+    printf("start patterson decoding\n");
+    bmatrix_print(tmp);
+    patterson_decoding(decoded_vec, tmp, ctx);
+    goto end;
+    bmatrix_slice(tmp2, decoded_vec, k);
+
+    bmatrix_generate_inverse(sInv, ctx->key.S);
+    bmatrix_mul(dst, tmp2, sInv);
+
+end:
+    bmatrix_free(sInv);
+    bmatrix_free(pInv);
+    bmatrix_free(tmp);
+    bmatrix_free(tmp2);
 }
 
 /*
@@ -370,8 +399,9 @@ int patterson_decoding(BMAT dst, BMAT src, Param* ctx)
     ***********************************************/    
 
     bmatrix_init(received_vec_tp, src->c, src->r);
+    bmatrix_transpose(received_vec_tp, src);
+
     bmatrix_init(syndrome, ctx->paritycheckMatrix->r, 1);
-    
     bmatrix_mul(syndrome, ctx->paritycheckMatrix, received_vec_tp);
     bmatrix_free(received_vec_tp);
 
@@ -385,20 +415,17 @@ int patterson_decoding(BMAT dst, BMAT src, Param* ctx)
     }
     */
 
-    printf("syndrome \n");
+    // ctx.n = 16;
+    // ctx.t = 3;
+    // ctx.m = 4;
+    printf("syndrome \n"); //테스트 중
     bmatrix_print(syndrome);
-
+    
     gf2m_init(&synPoly, ctx->t);
-    for(i = 0; i < syndrome->r; i++)
-    {
-        if(b_mat_entry(syndrome, i, 0) == 1)
-        {
-            synPoly.term[i/ctx->m].binary[0] ^= (1<<(i%ctx->m)); // 0 맞을까?
-        }
-    }
+    bmatrix_to_gf2m(&synPoly, syndrome, ctx->m, ctx->t);
+
     printf("syndrome poly\n");
     gf2m_print(&synPoly);
-    //matrix to polynomial
 
     /***********************************************
      * Step 2. Compute the inverse of syndrome
@@ -409,13 +436,22 @@ int patterson_decoding(BMAT dst, BMAT src, Param* ctx)
 
     gf2m_xgcd(&gcd, &synPoly, &ctx->Goppa, &inv, &tmp, &ctx->mod);
 
+    printf("inv poly deg: %d\n", inv.deg);
+    gf2m_print(&inv);
     /***********************************************
      * Step 3. Get S(X)^-1 + X
     ***********************************************/
 
     gf2m_init(&X, 1);
     gf2_set_one(&X.term[1]);
+    printf("X (deg %d)\n", X.deg);
+    gf2m_print(&X);
+
+    gf2m_init(&synPolyInv, inv.deg);
     gf2m_add(&synPolyInv, &inv, &X);
+
+    printf("inv + x\n");
+    gf2m_print(&synPolyInv);
 
     /***********************************************
      * Step 4. Get the square root T(X) of S(X)^-1 + X
@@ -423,6 +459,9 @@ int patterson_decoding(BMAT dst, BMAT src, Param* ctx)
 
     gf2m_init(&polyTmp, ctx->t);
     gf2m_square_root(&polyTmp, &synPolyInv, &ctx->Goppa, & ctx->mod);
+
+    printf("square root result\n");
+    gf2m_print(&polyTmp);
 
     /***********************************************
      * Step 5. Solve the key equation
@@ -435,6 +474,9 @@ int patterson_decoding(BMAT dst, BMAT src, Param* ctx)
     gf2m_init(&Bx, ctx->t/2);
 
     EEA_patterson(&polyTmp, &ctx->Goppa, &Ax, &Bx, &ctx->mod);
+    printf("EEA result\n");
+    gf2m_print(&Ax);
+    gf2m_print(&Bx);
 
     /***********************************************
      * Step 6. Compute sigma poly. (error locator poly.)

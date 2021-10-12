@@ -113,24 +113,73 @@ static void test_patterson_decoding()
     int res = 0;
     BMAT message;
     BMAT enc;
+    BMAT decrypted_message;
     Param ctx;
+    gf2 tmp;
 
     memset(&ctx, 0x00, sizeof(Param));
 
     //2^m >= n && n > mt
-    ctx.n = 16;
+    // ctx.n = 16;
+    // ctx.t = 3;
+    // ctx.m = 4;
+
+    ctx.n = 42;
     ctx.t = 3;
-    ctx.m = 4;
+    ctx.m = 13;
 
     gf2_init(&ctx.mod, ctx.m);
-    gf2_generate_irreducible(&ctx.mod, ctx.m);
+    //gf2_generate_irreducible(&ctx.mod, ctx.m);
+    gf2_set_index(&ctx.mod, 13);
+    gf2_set_index(&ctx.mod, 4);
+    gf2_set_index(&ctx.mod, 3);
+    gf2_set_index(&ctx.mod, 1);
+    gf2_set_index(&ctx.mod, 0);
+    
     gf2_fit_len(&ctx.mod);
     gf2_print(&ctx.mod);
 
     gf2m_init(&ctx.Goppa, ctx.t);
-    gf2m_generate_irreducible(&ctx.Goppa, &ctx.mod, ctx.t);
+    gf2_init(&tmp, ctx.m);
+    //gf2m_generate_irreducible(&ctx.Goppa, &ctx.mod, ctx.t);
+    // irreducible poly
+    //(z^0 )*X^3+(z^9 +z^7 +z^5 +z^4 +z^3 +z^2 +z^0 )*X^2+(z^10 +z^7 +z^5 +z^3 +z^2 +z^0 )*X^1+(z^9 +z^7 +z^5 +z^2 +z^1 )*X^0
+
+    gf2_set_index(&tmp, 0);
+    gf2m_set_index(&ctx.Goppa, &tmp, 3);
+
+    gf2_set_index(&tmp, 9);
+    gf2_set_index(&tmp, 7);
+    gf2_set_index(&tmp, 5);
+    gf2_set_index(&tmp, 4);
+    gf2_set_index(&tmp, 3);
+    gf2_set_index(&tmp, 2);
+    gf2_fit_len(&tmp);
+    gf2m_set_index(&ctx.Goppa, &tmp, 2);
+
+    gf2_set_zero(&tmp);
+    gf2_set_index(&tmp, 10);
+    gf2_set_index(&tmp, 7);
+    gf2_set_index(&tmp, 5);
+    gf2_set_index(&tmp, 3);
+    gf2_set_index(&tmp, 2);
+    gf2_set_index(&tmp, 0);
+    gf2_fit_len(&tmp);
+    gf2m_set_index(&ctx.Goppa, &tmp, 1);
+
+    gf2_set_zero(&tmp);
+    gf2_set_index(&tmp, 9);
+    gf2_set_index(&tmp, 7);
+    gf2_set_index(&tmp, 5);
+    gf2_set_index(&tmp, 2);
+    gf2_set_index(&tmp, 1);
+    gf2_fit_len(&tmp);
+    gf2m_set_index(&ctx.Goppa, &tmp, 0);
+    gf2m_fit_len(&ctx.Goppa);
+
     printf(" irreducible poly  = ");    gf2m_print(&ctx.Goppa);
 
+    return ;
     generateSupportSet(&ctx);
     
     while(get_paritycheck_matrix(&ctx) == FAILURE);
@@ -154,6 +203,7 @@ static void test_patterson_decoding()
     encryption(enc, message, &ctx);
 
     printf("decryption \n");
+    decryption(decrypted_message, enc, &ctx);
     //추가 예정
 
     clearParam(&ctx);
