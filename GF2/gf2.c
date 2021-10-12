@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "bmatrix.h"
+
 /*
 @   a : Fq element
 @   t : degree of a (with constant) (ex. z^2+z+1 -> 3) maximum degree is 14 (z^13)
@@ -11,7 +12,7 @@ void gf2_init(gf2* a, int t)
     int iter;
 
     a->deg = t + 1;    
-    for(iter = 0; iter < size; ++iter)
+    for(iter = 0; iter < SIZE; ++iter)
         a->binary[iter] = 0;
 }
 /////////////////////////////////////////////////////////////////////
@@ -95,7 +96,7 @@ void gf2_print_pretty(gf2* a)
 void gf2_fit_len(gf2* a)
 {
     int i,j;
-    int q = a->deg / 8;
+    int q = SIZE / 8;
 
     for(j=7; j>=0; j--)
     {
@@ -147,7 +148,7 @@ void gf2_set_zero(gf2* a)
 {
     int i;
     a->deg = 1;
-    for(i=0; i<size; i++)
+    for(i=0; i<SIZE; i++)
         a->binary[i] = 0;
 }
 /////////////////////////////////////////////////////////////////////
@@ -158,7 +159,7 @@ void gf2_set_one(gf2* a)
 {
     int i;
     a->deg = 1;
-    for(i=0; i<size; i++)
+    for(i=0; i<SIZE; i++)
         a->binary[i] = 0;
 
     a->binary[0] = 1;
@@ -851,4 +852,20 @@ int gf2tonum(gf2 src)
     res = src.binary[0] ^ (src.binary[1] << 8) ^ (src.binary[2] << 16) ^ (src.binary[3] << 24);
     
     return res;
+}
+
+
+bool gf2_is_equal(gf2* src1, gf2* src2)
+{
+    if(src1->deg != src2->deg)
+        return false;
+
+    int i = src1->deg;
+
+    for(i=0; i<src1->deg; ++i)
+    {
+        if(src1->binary[i] != src2->binary[i])
+            return false;
+    }
+    return true;
 }

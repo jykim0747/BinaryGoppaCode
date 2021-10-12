@@ -4,14 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "error.h"
+#include <stdbool.h>
 
-#define size 500
+#define SIZE 500
 
 /* GF2 element struct */
 typedef struct 
 {
     int deg;
-    unsigned char binary[size];
+    unsigned char binary[SIZE];
 }gf2;
 
 #define binary_len(X, Y) {\
@@ -61,6 +62,8 @@ void gf2_diff(gf2* dst, gf2* src);
 int gf2_berlekamp_factoring(gf2* src);
 gf2 numtogf2(int num);
 int gf2tonum(gf2 src);
+
+bool gf2_is_equal(gf2* src1, gf2* src2);
 
 void test_gf2_init();
 void test_gf2_math_operation();
