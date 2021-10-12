@@ -70,11 +70,12 @@ void generate_random_bmatrix(BMAT mat)
     int i, j;
     int r = mat->c % 8;
     unsigned char mask[8] = {0xff, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe};
+
     for(i=0; i<mat->r; ++i){
         for(j=0; j<mat->cnum-1; ++j){
             b_mat_entry(mat, i, j) = rand();
         }
-        b_mat_entry(mat, i, mat->cnum-1) = rand()%mask[r];
+        b_mat_entry(mat, i, mat->cnum-1) = rand()&mask[r];
     }
 }
 
@@ -593,4 +594,22 @@ void bmatrix_slice(BMAT dst, BMAT src, int n)
         }
     }
 
+}
+
+/**
+ *  src : n x 1 binary matrix
+ *  dst : gf2m
+ */
+void bmatrix_to_gf2m(gf2m* dst, BMAT src, int m, int t)
+{
+    int i = 0;
+    
+    for(i = 0; i < src->r; ++i)
+    {
+        if(b_mat_entry(src, i, 0) & 0x80)
+        {
+            dst->term[i / m].binary[0] ^= (1<< (i % m));
+        }
+    }
+    gf2m_fit_len(dst);
 }

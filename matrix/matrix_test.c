@@ -340,6 +340,28 @@ void test_matrix_slice()
 
 }
 
+void test_matrix_mat_2_gf2m()
+{
+    BMAT A;
+    gf2m poly;
+    int t = 3;
+    int m = 4;
+    int row = 12;
+    int col = 1;
+    
+    bmatrix_init(A, row, col);    
+    generate_random_bmatrix(A);
+
+    printf("A \n");
+    bmatrix_print(A);
+
+    gf2m_init(&poly, t);
+    bmatrix_to_gf2m(&poly, A, m, t);
+
+    bmatrix_free(A);
+
+}
+
 
 void test_gf2_matrix_operation()
 {
@@ -363,5 +385,6 @@ void test_bmatrix_operation()
     //test_matrix_transpose();
     //test_matrix_mul();
     //test_matrix_inverse();
-    test_matrix_slice();
+    //test_matrix_slice();
+    test_matrix_mat_2_gf2m();
 }
