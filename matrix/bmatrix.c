@@ -559,3 +559,38 @@ int bmatrix_add(BMAT dst, BMAT src1, BMAT src2)
 end:
     return res;
 }
+
+
+/*
+@   n-bit를 잘라오는 함수
+@   dst : 자른 n비트 행렬
+@   src : 입력
+@     n : 자르는 비트 크기
+*/
+void bmatrix_slice(BMAT dst, BMAT src, int n)
+{
+    int i,j;
+    unsigned char mask[9] = {0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe, 0xff};
+
+    if(n == 0)
+        return;
+
+    bmatrix_init(dst, src->r, n); // 내부 생성 후 반환
+    if(n <= 8){  //한 워드(8bit) 이내인 경우
+        for(i=0; i<src->r; ++i){
+            b_mat_entry(dst, i, 0) = b_mat_entry(src, i, 0) & mask[n];
+        }
+    }
+    else{
+        int nr = n % 8;
+        int nq = n / 8;
+
+        for(i=0; i<src->r; ++i){
+            for(j=0; j<nq - 1; ++j){
+                b_mat_entry(dst, i, j) = b_mat_entry(src, i, j);
+            }
+                b_mat_entry(dst, i, nq) ^= b_mat_entry(src, i, nq) & mask[nr];
+        }
+    }
+
+}

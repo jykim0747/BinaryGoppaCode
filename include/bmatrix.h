@@ -45,6 +45,7 @@ int bmatrix_mul(BMAT dst, BMAT src1, BMAT src2);
 int bmatrix_inverse(BMAT dst, BMAT src);
 void bmatrix_generate_inverse(BMAT dst, BMAT src);
 int bmatrix_add(BMAT dst, BMAT src1, BMAT src2);
+void bmatrix_slice(BMAT dst, BMAT src, int n);
 
 void test_bmatrix_operation();
 

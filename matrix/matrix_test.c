@@ -317,6 +317,30 @@ void test_matrix_inverse()
 
 }
 
+void test_matrix_slice()
+{
+    BMAT A, B;
+    int row = 3;
+    int col = 28;
+    int n = 20;
+    
+    bmatrix_init(A, row, col);
+    
+    generate_random_bmatrix(A);
+
+    printf("A \n");
+    bmatrix_print(A);
+
+    bmatrix_slice(B, A, n);
+    printf("B =  %d bits of A \n", n);
+    bmatrix_print(B);
+
+    bmatrix_free(A);
+    bmatrix_free(B);
+
+}
+
+
 void test_gf2_matrix_operation()
 {
     test_init_matrix();
@@ -337,6 +361,7 @@ void test_bmatrix_operation()
     //test_gf2m_to_bmat();
     //test_concat_horizontal();
     //test_matrix_transpose();
-    test_matrix_mul();
+    //test_matrix_mul();
     //test_matrix_inverse();
+    test_matrix_slice();
 }
