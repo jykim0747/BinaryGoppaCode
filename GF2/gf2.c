@@ -693,7 +693,7 @@ void gf2_xgcd(gf2* gcd, gf2* x, gf2* y, gf2* a, gf2* b)
     gf2 tmp;
 
     int len = a->deg <= b->deg ? 2*(b->deg-1) : 2*(a->deg-1);
-
+    
     gf2_init(&t0, 1);    gf2_init(&t1, 1);    gf2_init(&t2, 1);
     gf2_init(&v0, 1);    gf2_init(&v1, 1);    gf2_init(&v2, 1);
     gf2_init(&u0, 1);    gf2_init(&u1, 1);    gf2_init(&u2, 1);
@@ -735,6 +735,7 @@ void gf2_xgcd(gf2* gcd, gf2* x, gf2* y, gf2* a, gf2* b)
         gf2_mul(&tmp, &Q, &v1);       //v1 = v2 - qv1
         gf2_add(&v1, &v2 ,&tmp);
         gf2_set_zero(&Q);
+        gf2_set_zero(&tmp);
     }
     gf2_fit_len(&u0);
     gf2_fit_len(&v0);
