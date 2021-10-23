@@ -36,7 +36,7 @@ void generateError(BMAT error, int num);
 void encryption(BMAT dst, BMAT src, Param* ctx);
 void decryption(BMAT dst, BMAT src, Param* ctx);
 int patterson_decoding(BMAT dst, BMAT src, Param* ctx);
-int EEA_patterson(gf2m* x, gf2m* y, gf2m* a, gf2m* b, gf2m* mod);
+int EEA_patterson(gf2m* x, gf2m* y, gf2m* a, gf2m* b, gf2* mod);
 
 gf2 horner_method(gf2m* poly, gf2* src, gf2* mod);
 int find_root(gf2* root_set, gf2m* poly, Param* ctx);

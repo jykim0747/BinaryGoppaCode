@@ -59,7 +59,6 @@ int get_paritycheck_matrix(Param* ctx)
 
     gf2_init(&X, 1);
     bmatrix_init(mat, ctx->t * ctx->m, ctx->n);
-
     for (i = 0; i < ctx->n; ++i)
     {
 
@@ -68,7 +67,6 @@ int get_paritycheck_matrix(Param* ctx)
         */
 
         X = numtogf2(ctx->supportSet[i]);
-
         /*
         Step 2: Set (X - a(i)) = Lpoly
         */
@@ -101,7 +99,6 @@ int get_paritycheck_matrix(Param* ctx)
 
         gf2m_to_bmat(mat, inv, ctx->m, i);
     }
-
     //echelon form 을 적용하여 항등 행렬 I를 가지는지 확인
     bmatrix_init(mat_ech, ctx->t * ctx->m, ctx->n);
     bmatrix_echelon(mat_ech, mat);
@@ -112,7 +109,6 @@ int get_paritycheck_matrix(Param* ctx)
         res = FAILURE;
         goto end;
     }
-
     //중복 코드 처리 필요
     if(has_Identity_bmat(mat_ech) == IDENTITY)
     {
@@ -496,9 +492,9 @@ int patterson_decoding(BMAT dst, BMAT src, Param* ctx)
      * Step 7. Find all roots of sigma(X)
     ***********************************************/
 
-    gf2_init(&rootSet, ctx->t);
+    gf2_init(rootSet, ctx->t);
 
-    solNum = find_root(&rootSet, &sigma, ctx);
+    solNum = find_root(rootSet, &sigma, ctx);
 
     printf("root of sigma %d개 \n", solNum);
     i = solNum;
@@ -544,7 +540,7 @@ end:
 /*
 @   B*X == A mod Y
 */
-int EEA_patterson(gf2m* x, gf2m* y, gf2m* a, gf2m* b, gf2m* mod)
+int EEA_patterson(gf2m* x, gf2m* y, gf2m* a, gf2m* b, gf2* mod)
 {
     int t = y->deg;
     gf2m t0, t1, t2;
