@@ -359,7 +359,7 @@ int gf2_mulmod(gf2* dst, gf2* a, gf2* b, gf2* mod)
     gf2 tmp;
 
     gf2_init(&Q, 1);
-
+    gf2_init(&tmp, 1);
     gf2_mul(&tmp, a, b);
     gf2_long_division(&Q, dst, &tmp, mod);
 
